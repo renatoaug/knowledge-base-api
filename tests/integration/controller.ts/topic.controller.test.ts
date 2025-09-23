@@ -148,4 +148,21 @@ describe('[integration] GET /topics/:id', () => {
     expect(res.body.version).toBe(2)
     expect(res.body.content).toBe('c2')
   })
+
+  it('returns 400 when version is not a number', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    const res = await request(app)
+      .get(`/topics/${topicId}?version=abc`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(400)
+
+    expect(res.body.message).toBe('Version must be a number')
+  })
 })

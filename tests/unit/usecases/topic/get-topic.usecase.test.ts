@@ -39,6 +39,28 @@ describe('[unit] GetTopicUseCase', () => {
     )
   })
 
+  it('throws 400 when version is not a number', async () => {
+    const topicId = 't1'
+
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn(),
+    } as any
+
+    const topicRepository: ITopicRepository = {
+      get: jest.fn(),
+      upsert: jest.fn(),
+    } as any
+
+    const uc = new GetTopicUseCase(topicVersionRepository, topicRepository)
+
+    // force string to number in runtime
+    await expect(uc.execute(topicId, 'abc' as unknown as number)).rejects.toMatchObject({
+      status: 400,
+      message: 'Version must be a number',
+    })
+  })
+
   it('returns specific version when version is provided', async () => {
     const topicId = 't1'
     const v1: TopicVersion = {
