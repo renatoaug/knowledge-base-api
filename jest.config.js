@@ -3,8 +3,9 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  testMatch: ['<rootDir>/tests/**/*.test.ts'],
+  testMatch: ['<rootDir>/tests/unit/**/*.test.ts', '<rootDir>/tests/integration/**/*.test.ts'],
   testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   restoreMocks: true,
   clearMocks: true,
   resetMocks: true,

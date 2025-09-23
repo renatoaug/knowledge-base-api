@@ -9,7 +9,11 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    }
   },
   "include": ["src", "tests"]
 }
