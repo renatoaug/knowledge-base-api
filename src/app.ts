@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import { topicRoute } from 'src/routes'
-import { errorHandler } from 'src/middleware/error.middleware'
+import { ErrorMiddleware } from 'src/middleware'
 
 const app = express()
 app.use(express.json())
@@ -15,6 +15,6 @@ app.get('/health', (_req, res): void => {
 
 app.use('/topics', topicRoute)
 
-app.use(errorHandler)
+app.use(ErrorMiddleware.handle)
 
 export default app
