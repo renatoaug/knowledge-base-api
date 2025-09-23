@@ -7,23 +7,31 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "prepare": "npx husky",
     "start": "node dist/server.js"
   },
   "author": "",
   "license": "ISC",
   "private": "true",
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "express": "^5.1.0",
     "helmet": "^8.1.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/compat": "^1.4.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"

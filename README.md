@@ -53,7 +53,11 @@ src/
 This repository follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Examples:
 
 - `build: setup project`
-- `style: add lint`
+- `style: format files`
 - `feat(topic): create versioning factory`
 - `test: add unit tests for topic service`
 - `refactor: extract permission strategy`
+
+### Husky <sub><sup>(required to commit)</sup></sub>
+
+We use [husky](https://www.npmjs.com/package/husky) to handle some hooks like `pre-commit` and `commit-msg`.
