@@ -32,6 +32,13 @@ cp .env.example .env
 $ npm run dev
 ```
 
+## Test
+
+```bash
+$ nvm use
+$ npm run test
+```
+
 ### Project structure
 
 ```
