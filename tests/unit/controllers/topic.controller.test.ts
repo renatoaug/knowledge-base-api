@@ -54,3 +54,90 @@ describe('[unit] TopicController - create', () => {
     expect((jsonMock.mock.calls[0][0] as TopicVersion).version).toBe(1)
   })
 })
+
+describe('[unit] TopicController - update', () => {
+  it('returns 200 with updated topic', async () => {
+    const versionId = crypto.randomUUID()
+    const mockService: Partial<TopicService> = {
+      update: jest.fn(
+        async () =>
+          ({
+            id: versionId,
+            topicId: 't1',
+            version: 2,
+            name: 'Root',
+            content: 'c2',
+            parentTopicId: null,
+            createdAt: Date.now() - 1000,
+            updatedAt: Date.now(),
+            action: TopicAction.UPDATE,
+            performedBy: 'u-editor',
+          }) as TopicVersion,
+      ),
+    }
+
+    const controller = new TopicController(mockService as unknown as TopicService)
+
+    const req = { params: { id: 't1' }, body: { content: 'c2' } } as unknown as Request
+    const { res, statusMock, jsonMock } = createMockResponse()
+
+    await controller.update(req, res)
+
+    expect(statusMock).toHaveBeenCalledWith(200)
+    const body = jsonMock.mock.calls[0][0] as any
+    expect(body.versionId).toBe(versionId)
+    expect(body.id).toBeUndefined()
+  })
+})
+
+describe('[unit] TopicController - delete', () => {
+  it('returns 204', async () => {
+    const mockService: Partial<TopicService> = {
+      delete: jest.fn(async () => {}),
+    }
+
+    const controller = new TopicController(mockService as unknown as TopicService)
+
+    const req = { params: { id: 't1' } } as unknown as Request
+    const { res, statusMock } = createMockResponse()
+
+    await controller.delete(req, res)
+
+    expect(statusMock).toHaveBeenCalledWith(204)
+  })
+})
+
+describe('[unit] TopicController - get', () => {
+  it('returns 200 with topic', async () => {
+    const versionId = crypto.randomUUID()
+    const mockService: Partial<TopicService> = {
+      get: jest.fn(
+        async () =>
+          ({
+            id: versionId,
+            topicId: 't1',
+            version: 2,
+            name: 'Root',
+            content: 'c2',
+            parentTopicId: null,
+            createdAt: Date.now() - 1000,
+            updatedAt: Date.now(),
+            action: TopicAction.UPDATE,
+            performedBy: 'u-editor',
+          }) as TopicVersion,
+      ),
+    }
+
+    const controller = new TopicController(mockService as unknown as TopicService)
+
+    const req = { params: { id: 't1' }, query: {} } as unknown as Request
+    const { res, statusMock, jsonMock } = createMockResponse()
+
+    await controller.get(req, res)
+
+    expect(statusMock).toHaveBeenCalledWith(200)
+    const body = jsonMock.mock.calls[0][0] as any
+    expect(body.versionId).toBe(versionId)
+    expect(body.id).toBeUndefined()
+  })
+})
