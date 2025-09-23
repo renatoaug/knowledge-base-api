@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { AppError } from 'src/middleware'
+import { AppError } from 'src/middlewares'
 
 export class ValidationMiddleware {
   static validateBody<T extends z.ZodTypeAny>(

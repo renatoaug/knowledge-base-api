@@ -1,9 +1,8 @@
 import { Router } from 'express'
 import { makeTopicController } from 'src/container'
 import { z } from 'zod'
-import { ValidationMiddleware } from 'src/middleware'
+import { ValidationMiddleware } from 'src/middlewares'
 import { makeAuthMiddleware } from 'src/container'
-import { UserRole } from 'src/models/user'
 
 const router = Router()
 const controller = makeTopicController()
@@ -18,7 +17,7 @@ const createSchema = z.object({
 router.post(
   '/',
   auth.authenticate,
-  auth.authorize(UserRole.ADMIN, UserRole.EDITOR),
+  auth.authorize('topic:create'),
   ValidationMiddleware.validateBody(createSchema),
   controller.create,
 )

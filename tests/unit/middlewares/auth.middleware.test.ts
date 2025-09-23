@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Request, Response, NextFunction } from 'express'
-import { AuthMiddleware, AppError } from 'src/middleware'
+import { AuthMiddleware, AppError } from 'src/middlewares'
 import type { IUserRepository } from 'src/repositories'
 import { UserRole } from 'src/models/user'
+import { RoleBasedPermissionStrategy } from 'src/security/permission'
 
 function createReq(headers?: Record<string, string>, user?: unknown): Request {
   const h = Object.fromEntries(Object.entries(headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]))
@@ -36,7 +37,7 @@ describe('[unit] AuthMiddleware', () => {
 
   test('[authenticate] 401 when Authorization header is missing', async () => {
     const repo: Partial<IUserRepository> = { findByToken: jest.fn(async () => null) }
-    const auth = new AuthMiddleware(repo as IUserRepository)
+    const auth = new AuthMiddleware(repo as IUserRepository, new RoleBasedPermissionStrategy())
     const req = createReq()
     const res = createRes()
     const next = createNext()
@@ -51,7 +52,7 @@ describe('[unit] AuthMiddleware', () => {
 
   test('[authenticate] 401 when token is invalid', async () => {
     const repo: Partial<IUserRepository> = { findByToken: jest.fn(async () => null) }
-    const auth = new AuthMiddleware(repo as IUserRepository)
+    const auth = new AuthMiddleware(repo as IUserRepository, new RoleBasedPermissionStrategy())
     const req = createReq({ authorization: 'Bearer bad-token' })
     const res = createRes()
     const next = createNext()
@@ -65,7 +66,7 @@ describe('[unit] AuthMiddleware', () => {
 
   test('[authenticate] sets req.user and calls next on success', async () => {
     const repo: Partial<IUserRepository> = { findByToken: jest.fn(async () => validUser) }
-    const auth = new AuthMiddleware(repo as IUserRepository)
+    const auth = new AuthMiddleware(repo as IUserRepository, new RoleBasedPermissionStrategy())
     const req = createReq({ authorization: 'Bearer good-token' })
     const res = createRes()
     const next = createNext()
@@ -79,8 +80,8 @@ describe('[unit] AuthMiddleware', () => {
 
   test('[authorize] 401 when req.user is missing', () => {
     const repo: Partial<IUserRepository> = { findByToken: jest.fn(async () => null) }
-    const auth = new AuthMiddleware(repo as IUserRepository)
-    const guard = auth.authorize(UserRole.ADMIN)
+    const auth = new AuthMiddleware(repo as IUserRepository, new RoleBasedPermissionStrategy())
+    const guard = auth.authorize('topic:delete')
     const req = createReq()
     const res = createRes()
     const next = createNext()
@@ -93,8 +94,8 @@ describe('[unit] AuthMiddleware', () => {
 
   test('[authorize] 403 when user has insufficient role', () => {
     const repo: Partial<IUserRepository> = { findByToken: jest.fn(async () => null) }
-    const auth = new AuthMiddleware(repo as IUserRepository)
-    const guard = auth.authorize(UserRole.ADMIN)
+    const auth = new AuthMiddleware(repo as IUserRepository, new RoleBasedPermissionStrategy())
+    const guard = auth.authorize('topic:delete')
     const req = createReq({}, validUser)
     const res = createRes()
     const next = createNext()
@@ -107,8 +108,8 @@ describe('[unit] AuthMiddleware', () => {
 
   test('[authorize] calls next when user has allowed role', () => {
     const repo: Partial<IUserRepository> = { findByToken: jest.fn(async () => null) }
-    const auth = new AuthMiddleware(repo as IUserRepository)
-    const guard = auth.authorize(UserRole.ADMIN, UserRole.EDITOR)
+    const auth = new AuthMiddleware(repo as IUserRepository, new RoleBasedPermissionStrategy())
+    const guard = auth.authorize('topic:create')
     const req = createReq({}, validUser)
     const res = createRes()
     const next = createNext()

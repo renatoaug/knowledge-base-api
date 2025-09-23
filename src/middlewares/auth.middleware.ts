@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from 'express'
-import { UserRole } from 'src/models/user'
+import { User, UserRole } from 'src/models/user'
 import { IUserRepository } from 'src/repositories'
-import { AppError } from 'src/middleware'
+import type { Action, PermissionStrategy } from 'src/security/permission'
+import { AppError } from 'src/middlewares'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -13,7 +14,10 @@ declare global {
 }
 
 export class AuthMiddleware {
-  constructor(private readonly users: IUserRepository) {}
+  constructor(
+    private readonly users: IUserRepository,
+    private readonly permissions: PermissionStrategy,
+  ) {}
 
   authenticate = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     const header = req.header('authorization') || ''
@@ -28,10 +32,10 @@ export class AuthMiddleware {
     next()
   }
 
-  authorize = (...roles: UserRole[]) => {
+  authorize = (action: Action) => {
     return (req: Request, _res: Response, next: NextFunction) => {
       if (!req.user) return next(new AppError(401, 'Unauthorized'))
-      if (roles.length > 0 && !roles.includes(req.user.role)) {
+      if (!this.permissions.can(req.user as User, action)) {
         return next(new AppError(403, 'Forbidden'))
       }
 

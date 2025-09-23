@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import { topicRoute } from 'src/routes'
-import { ErrorMiddleware } from 'src/middleware'
+import { ErrorMiddleware } from 'src/middlewares'
 
 const app = express()
 app.use(express.json())
