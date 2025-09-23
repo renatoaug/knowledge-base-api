@@ -24,4 +24,9 @@ export class TopicController {
     await this.service.delete(req.params.id, req.user!)
     res.status(204).end()
   }
+
+  get = async (req: Request, res: Response): Promise<void> => {
+    const topic = await this.service.get(req.params.id, req.query.version as number | undefined)
+    res.status(200).json(this.toResponse(topic))
+  }
 }

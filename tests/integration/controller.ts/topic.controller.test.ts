@@ -101,3 +101,68 @@ describe('[integration] DELETE /topics/:id', () => {
       .expect(expected)
   })
 })
+
+describe('[integration] GET /topics/:id', () => {
+  it('returns 200 with latest version formatted', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    const res = await request(app)
+      .get(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    expect(res.body.versionId).toBeTruthy()
+    expect(res.body.id).toBeUndefined()
+    expect(res.body.version).toBe(1)
+    expect(res.body.name).toBe('Root')
+  })
+
+  it('returns 200 with specific version when version is provided', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    const update = await request(app)
+      .put(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer editor-token')
+      .send({ content: 'c2' })
+      .expect(200)
+
+    expect(update.body.version).toBe(2)
+
+    const res = await request(app)
+      .get(`/topics/${topicId}?version=2`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    expect(res.body.version).toBe(2)
+    expect(res.body.content).toBe('c2')
+  })
+
+  it('returns 400 when version is not a number', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    const res = await request(app)
+      .get(`/topics/${topicId}?version=abc`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(400)
+
+    expect(res.body.message).toBe('Version must be a number')
+  })
+})
