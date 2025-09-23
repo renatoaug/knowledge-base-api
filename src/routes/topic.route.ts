@@ -36,4 +36,6 @@ router.put(
   controller.update,
 )
 
+router.delete('/:id', auth.authenticate, auth.authorize('topic:delete'), controller.delete)
+
 export default router

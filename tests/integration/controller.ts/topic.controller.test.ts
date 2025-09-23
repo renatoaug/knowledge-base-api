@@ -80,3 +80,24 @@ describe('[integration] PUT /topics/:id', () => {
     expect(update.body.performedBy).toBe('u-editor')
   })
 })
+
+describe('[integration] DELETE /topics/:id', () => {
+  it.each([
+    ['admin-token', 204],
+    ['editor-token', 403],
+    ['viewer-token', 403],
+  ])('with %s should return %s', async (token, expected) => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    await request(app)
+      .delete(`/topics/${topicId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(expected)
+  })
+})
