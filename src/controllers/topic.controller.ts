@@ -5,7 +5,7 @@ import { TopicVersion } from 'src/models'
 export class TopicController {
   constructor(private readonly service: TopicService) {}
 
-  private toResponse(version: TopicVersion) {
+  private toResponse(version: TopicVersion): Omit<TopicVersion, 'id'> & { versionId: string } {
     const { id, ...rest } = version
     return { versionId: id, ...rest }
   }
