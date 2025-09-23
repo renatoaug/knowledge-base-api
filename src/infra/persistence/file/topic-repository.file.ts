@@ -1,5 +1,5 @@
 import { readJsonFile, writeJsonFile } from 'src/utils/fs-json'
-import { Topic, TopicVersion } from 'src/models'
+import { Topic, TopicId, TopicVersion } from 'src/models'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 
 type VersionStore = { versions: TopicVersion[] }
@@ -15,6 +15,11 @@ export class TopicVersionRepositoryFile implements ITopicVersionRepository {
 
     await writeJsonFile(VERSION_FILE, store)
   }
+
+  async getByTopicAndVersion(topicId: TopicId, version: number): Promise<TopicVersion | undefined> {
+    const store = await readJsonFile<VersionStore>(VERSION_FILE, { versions: [] })
+    return store.versions.find((v) => v.topicId === topicId && v.version === version)
+  }
 }
 
 export class TopicRepositoryFile implements ITopicRepository {
@@ -25,5 +30,10 @@ export class TopicRepositoryFile implements ITopicRepository {
     else store.topics.push(topic)
 
     await writeJsonFile(TOPIC_FILE, store)
+  }
+
+  async get(topicId: TopicId): Promise<Topic | undefined> {
+    const store = await readJsonFile<TopicStore>(TOPIC_FILE, { topics: [] })
+    return store.topics.find((t) => t.topicId === topicId)
   }
 }

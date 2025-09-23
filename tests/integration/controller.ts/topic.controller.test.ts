@@ -11,7 +11,7 @@ describe('[integration] POST /topics', () => {
       .expect(201)
 
     const body = res.body
-    expect(typeof body.id).toBe('string')
+    expect(typeof body.versionId).toBe('string')
     expect(typeof body.topicId).toBe('string')
     expect(body.version).toBe(1)
     expect(body.name).toBe('Root')
@@ -20,7 +20,7 @@ describe('[integration] POST /topics', () => {
     expect(typeof body.createdAt).toBe('number')
     expect(body.updatedAt).toBe(body.createdAt)
     expect(body.action).toBe('create')
-    expect(body.performedBy).toBe('userId')
+    expect(body.performedBy).toBe('u-editor')
   })
 
   it('returns 400 when body is missing required fields', async () => {
@@ -56,5 +56,27 @@ describe('[integration] POST /topics', () => {
       .expect(403)
 
     expect(res.body.message).toBe('Forbidden')
+  })
+})
+
+describe('[integration] PUT /topics/:id', () => {
+  it('updates topic and creates new version', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    const update = await request(app)
+      .put(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer editor-token')
+      .send({ content: 'c2' })
+      .expect(200)
+
+    expect(update.body.version).toBe(2)
+    expect(update.body.content).toBe('c2')
+    expect(update.body.performedBy).toBe('u-editor')
   })
 })
