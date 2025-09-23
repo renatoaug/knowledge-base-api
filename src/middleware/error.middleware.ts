@@ -10,17 +10,23 @@ export class AppError extends Error {
   }
 }
 
-export function errorHandler(
-  err: unknown,
-  _req: Request,
-  res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _next: NextFunction,
-): void {
-  if (err instanceof AppError) {
-    res.status(err.status).json({ message: err.message, details: err.details ?? null })
-    return
-  }
+export class ErrorMiddleware {
+  static handle(
+    err: unknown,
+    _req: Request,
+    res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _next: NextFunction,
+  ): void {
+    if (err instanceof AppError) {
+      res.status(err.status).json({
+        message: err.message,
+        statusCode: String(err.status),
+        details: err.details ?? null,
+      })
+      return
+    }
 
-  res.status(500).json({ message: 'Internal Server Error' })
+    res.status(500).json({ message: 'Internal Server Error', statusCode: '500', details: null })
+  }
 }
