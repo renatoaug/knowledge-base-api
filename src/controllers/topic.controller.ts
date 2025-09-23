@@ -19,4 +19,9 @@ export class TopicController {
     const updated = await this.service.update(req.params.id, req.body, req.user!)
     res.status(200).json(this.toResponse(updated))
   }
+
+  delete = async (req: Request, res: Response): Promise<void> => {
+    await this.service.delete(req.params.id, req.user!)
+    res.status(204).end()
+  }
 }
