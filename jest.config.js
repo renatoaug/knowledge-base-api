@@ -9,10 +9,10 @@ module.exports = {
   restoreMocks: true,
   clearMocks: true,
   resetMocks: true,
-  collectCoverage: false,
+  collectCoverage: true,
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['src/**'],
-  coveragePathIgnorePatterns: ['/node_modules/', '/tests/'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/tests/', '/src/repositories/', 'server.ts'],
   coverageReporters: ['lcovonly', 'text', 'html'],
   coverageThreshold: {
     global: {

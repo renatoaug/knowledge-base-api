@@ -1,6 +1,8 @@
 import { TopicController } from 'src/controllers'
 import { TopicService } from 'src/services'
 import { makeTopicRepositories } from 'src/infra/persistence'
+import { AuthMiddleware } from 'src/middlewares'
+import { RoleBasedPermissionStrategy } from 'src/security/permission'
 
 export function makeTopicController(): TopicController {
   const { topicRepository: topics, topicVersionRepository: topicVersions } =
@@ -8,4 +10,10 @@ export function makeTopicController(): TopicController {
   const service = new TopicService(topicVersions, topics)
 
   return new TopicController(service)
+}
+
+export function makeAuthMiddleware(): AuthMiddleware {
+  const { userRepository: users } = makeTopicRepositories('file')
+  const strategy = new RoleBasedPermissionStrategy()
+  return new AuthMiddleware(users, strategy)
 }

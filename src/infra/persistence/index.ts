@@ -1,11 +1,16 @@
-import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
-import { TopicRepositoryFile, TopicVersionRepositoryFile } from 'src/infra/persistence/file'
+import { ITopicRepository, ITopicVersionRepository, IUserRepository } from 'src/repositories'
+import {
+  TopicRepositoryFile,
+  TopicVersionRepositoryFile,
+  UserRepositoryFile,
+} from 'src/infra/persistence/file'
 
 export type PersistenceKind = 'file'
 
 export function makeTopicRepositories(kind: PersistenceKind = 'file'): {
   topicRepository: ITopicRepository
   topicVersionRepository: ITopicVersionRepository
+  userRepository: IUserRepository
 } {
   switch (kind) {
     case 'file':
@@ -13,6 +18,7 @@ export function makeTopicRepositories(kind: PersistenceKind = 'file'): {
       return {
         topicRepository: new TopicRepositoryFile(),
         topicVersionRepository: new TopicVersionRepositoryFile(),
+        userRepository: new UserRepositoryFile(),
       }
   }
 }

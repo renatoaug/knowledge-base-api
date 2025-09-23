@@ -6,6 +6,7 @@ describe('[integration] POST /topics', () => {
   it('returns 201 and the created topic version payload', async () => {
     const res = await request(app)
       .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
       .send({ name: 'Root', content: 'c', parentTopicId: null })
       .expect(201)
 
@@ -23,7 +24,11 @@ describe('[integration] POST /topics', () => {
   })
 
   it('returns 400 when body is missing required fields', async () => {
-    const res = await request(app).post('/topics').send({}).expect(400)
+    const res = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({})
+      .expect(400)
 
     expect(res.body.message).toBe('Validation error')
     expect(res.body.details).toBeTruthy()
@@ -32,6 +37,7 @@ describe('[integration] POST /topics', () => {
   it('returns 400 when name is too short', async () => {
     const res = await request(app)
       .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
       .send({ name: '', content: 'c', parentTopicId: crypto.randomUUID() })
       .expect(400)
 
@@ -40,5 +46,15 @@ describe('[integration] POST /topics', () => {
     expect(res.body.details.errors[0].message).toBe(
       'Too small: expected string to have >=1 characters',
     )
+  })
+
+  it('returns 403 when user is a viewer', async () => {
+    const res = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer viewer-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: crypto.randomUUID() })
+      .expect(403)
+
+    expect(res.body.message).toBe('Forbidden')
   })
 })

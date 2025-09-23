@@ -20,24 +20,33 @@ $ nvm use
 
 # install dependencies
 $ npm install
-
-# add .env
-cp .env.example .env
 ```
 
-## Running
+### Seed
+
+Seed users for local testing:
+
+```bash
+$ npm run seed
+```
+
+## Run application
 
 ```bash
 # serve with hot reload at http://localhost:3000
 $ npm run dev
 ```
 
-## Test
+## Testing
 
 ```bash
 $ nvm use
 $ npm run test
 ```
+
+### Authentication for local/dev
+
+Use header: `Authorization: Bearer editor-token` (`viewer-token` or `admin-token`).
 
 ### Project structure
 
