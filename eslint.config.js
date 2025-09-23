@@ -70,7 +70,7 @@ module.exports = [
     },
   },
   {
-    files: ['**/test/**/*.ts'],
+    files: ['**/tests/**/*.ts'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
