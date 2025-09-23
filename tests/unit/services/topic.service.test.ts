@@ -1,47 +1,86 @@
 import { TopicService } from 'src/services'
-import { Topic, TopicVersion, TopicAction } from 'src/models'
+import { TopicVersion, TopicAction } from 'src/models'
+import { User } from 'src/models/user'
+import { CreateTopicUseCase, UpdateTopicUseCase } from 'src/usecases/topic'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 
-describe('[unit] TopicService - create', () => {
-  it('creates a topic with version 1 and updates topic', async () => {
-    const topicVersions: TopicVersion[] = []
+describe('[unit] TopicService', () => {
+  it('create delegates to CreateTopicUseCase.execute', async () => {
     const topicVersionRepository: ITopicVersionRepository = {
-      append: jest.fn(async (v: TopicVersion) => {
-        topicVersions.push(v)
-      }),
-    }
-
-    const topics: Topic[] = []
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn(),
+    } as any
     const topicRepository: ITopicRepository = {
-      upsert: jest.fn(async (t: Topic) => {
-        topics.push(t)
-      }),
-    }
+      upsert: jest.fn(),
+      get: jest.fn(),
+    } as any
 
     const service = new TopicService(topicVersionRepository, topicRepository)
+    const user: User = {
+      id: 'u-editor',
+      name: 'Editor',
+      email: 'editor@example.com',
+      role: 'Editor' as any,
+      createdAt: Date.now(),
+    }
 
-    const created = await service.create({ name: 'Root', content: 'c' })
-
-    expect(created).toBeDefined()
-    expect(created.version).toBe(1)
-    expect(created.name).toBe('Root')
-    expect(created.content).toBe('c')
-    expect(created.parentTopicId).toBeNull()
-    expect(typeof created.id).toBe('string')
-    expect(typeof created.topicId).toBe('string')
-    expect(new Date(created.createdAt)).toEqual(expect.any(Date))
-    expect(created.updatedAt).toBe(created.createdAt)
-    expect(created.action).toBe(TopicAction.CREATE)
-    expect(created.performedBy).toBe('userId')
-
-    expect((topicVersionRepository.append as jest.Mock).mock.calls.length).toBe(1)
-    expect(topicVersions[0]).toMatchObject({
-      topicId: created.topicId,
+    const spy = jest.spyOn(CreateTopicUseCase.prototype, 'execute').mockResolvedValue({
+      id: 'v1',
+      topicId: 't1',
       version: 1,
       name: 'Root',
-    })
+      content: 'c',
+      parentTopicId: null,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      action: TopicAction.CREATE,
+      performedBy: user.id,
+    } as TopicVersion)
 
-    expect((topicRepository.upsert as jest.Mock).mock.calls.length).toBe(1)
-    expect(topics[0]).toEqual({ topicId: created.topicId, latestVersion: 1, deletedAt: null })
+    const input = { name: 'Root', content: 'c' }
+    const created = await service.create(input, user)
+
+    expect(spy).toHaveBeenCalledWith(input, user.id)
+    expect(created.version).toBe(1)
+    spy.mockRestore()
+  })
+
+  it('update delegates to UpdateTopicUseCase.execute', async () => {
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn(),
+    } as any
+    const topicRepository: ITopicRepository = {
+      upsert: jest.fn(),
+      get: jest.fn(),
+    } as any
+
+    const service = new TopicService(topicVersionRepository, topicRepository)
+    const user: User = {
+      id: 'u-editor',
+      name: 'Editor',
+      email: 'editor@example.com',
+      role: 'Editor' as any,
+      createdAt: Date.now(),
+    }
+
+    const spy = jest.spyOn(UpdateTopicUseCase.prototype, 'execute').mockResolvedValue({
+      id: 'v2',
+      topicId: 't1',
+      version: 2,
+      name: 'Root',
+      content: 'c2',
+      parentTopicId: null,
+      createdAt: Date.now() - 1000,
+      updatedAt: Date.now(),
+      action: TopicAction.UPDATE,
+      performedBy: user.id,
+    } as TopicVersion)
+
+    const res = await service.update('t1', { content: 'c2' }, user)
+
+    expect(spy).toHaveBeenCalledWith('t1', { content: 'c2' }, user.id)
+    expect(res.version).toBe(2)
+    spy.mockRestore()
   })
 })

@@ -1,6 +1,7 @@
-import crypto from 'node:crypto'
-import { TopicAction, TopicId, TopicVersion } from 'src/models'
+import { TopicId, TopicVersion } from 'src/models'
+import { User } from 'src/models/user'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
+import { CreateTopicUseCase, UpdateTopicUseCase } from 'src/usecases/topic'
 
 export interface CreateTopicInput {
   name: string
@@ -29,25 +30,13 @@ export class TopicService {
     private readonly topicRepository: ITopicRepository,
   ) {}
 
-  async create(input: CreateTopicInput): Promise<TopicVersion> {
-    const now = Date.now()
-    const topicId = crypto.randomUUID()
-    const version: TopicVersion = {
-      id: crypto.randomUUID(),
-      topicId,
-      version: 1,
-      name: input.name,
-      content: input.content,
-      parentTopicId: input.parentTopicId ?? null,
-      createdAt: now,
-      updatedAt: now,
-      action: TopicAction.CREATE,
-      performedBy: 'userId',
-    }
+  async create(input: CreateTopicInput, user: User): Promise<TopicVersion> {
+    const uc = new CreateTopicUseCase(this.topicVersionRepository, this.topicRepository)
+    return uc.execute(input, user.id)
+  }
 
-    await this.topicVersionRepository.append(version)
-    await this.topicRepository.upsert({ topicId, latestVersion: 1, deletedAt: null })
-
-    return version
+  async update(topicId: TopicId, input: UpdateTopicInput, user: User): Promise<TopicVersion> {
+    const uc = new UpdateTopicUseCase(this.topicVersionRepository, this.topicRepository)
+    return uc.execute(topicId, input, user.id)
   }
 }

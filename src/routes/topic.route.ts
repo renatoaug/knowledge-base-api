@@ -14,12 +14,26 @@ const createSchema = z.object({
   parentTopicId: z.uuid().nullable().optional(),
 })
 
+const updateSchema = z.object({
+  name: z.string().min(1).optional(),
+  content: z.string().min(1).optional(),
+  parentTopicId: z.uuid().nullable().optional(),
+})
+
 router.post(
   '/',
   auth.authenticate,
   auth.authorize('topic:create'),
   ValidationMiddleware.validateBody(createSchema),
   controller.create,
+)
+
+router.put(
+  '/:id',
+  auth.authenticate,
+  auth.authorize('topic:update'),
+  ValidationMiddleware.validateBody(updateSchema),
+  controller.update,
 )
 
 export default router

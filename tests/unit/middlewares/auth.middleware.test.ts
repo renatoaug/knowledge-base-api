@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Request, Response, NextFunction } from 'express'
 import { AuthMiddleware, AppError } from 'src/middlewares'
 import type { IUserRepository } from 'src/repositories'

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
-import { User, UserRole } from 'src/models/user'
+import { User } from 'src/models/user'
 import { IUserRepository } from 'src/repositories'
 import type { Action, PermissionStrategy } from 'src/security/permission'
 import { AppError } from 'src/middlewares'
@@ -8,7 +8,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      user?: { id: string; role: UserRole; name: string; email: string }
+      user?: User
     }
   }
 }
@@ -35,7 +35,7 @@ export class AuthMiddleware {
   authorize = (action: Action) => {
     return (req: Request, _res: Response, next: NextFunction) => {
       if (!req.user) return next(new AppError(401, 'Unauthorized'))
-      if (!this.permissions.can(req.user as User, action)) {
+      if (!this.permissions.can(req.user, action)) {
         return next(new AppError(403, 'Forbidden'))
       }
 

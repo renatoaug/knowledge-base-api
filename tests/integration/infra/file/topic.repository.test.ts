@@ -19,7 +19,7 @@ describe('[integration] Topic repository', () => {
       createdAt: Date.now(),
       updatedAt: Date.now(),
       action: TopicAction.CREATE,
-      performedBy: 'userId',
+      performedBy: 'u-editor',
     })
 
     await topicRepository.upsert({ topicId: 't1', latestVersion: 1, deletedAt: null })
