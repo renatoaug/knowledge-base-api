@@ -1,7 +1,12 @@
 import { TopicId, TopicVersion } from 'src/models'
 import { User } from 'src/models/user'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
-import { CreateTopicUseCase, UpdateTopicUseCase, DeleteTopicUseCase } from 'src/usecases/topic'
+import {
+  CreateTopicUseCase,
+  UpdateTopicUseCase,
+  DeleteTopicUseCase,
+  GetTopicUseCase,
+} from 'src/usecases/topic'
 
 export interface CreateTopicInput {
   name: string
@@ -34,5 +39,10 @@ export class TopicService {
   async delete(topicId: TopicId, user: User): Promise<void> {
     const uc = new DeleteTopicUseCase(this.topicVersionRepository, this.topicRepository)
     await uc.execute(topicId, user.id)
+  }
+
+  async get(topicId: TopicId, version?: number): Promise<TopicVersion> {
+    const uc = new GetTopicUseCase(this.topicVersionRepository, this.topicRepository)
+    return uc.execute(topicId, version)
   }
 }
