@@ -1,5 +1,5 @@
 import { TopicService } from 'src/services'
-import { TopicVersion, TopicAction } from 'src/models'
+import { TopicVersion, TopicAction, TopicTreeNode } from 'src/models/topic'
 import { User } from 'src/models/user'
 import {
   CreateTopicUseCase,
@@ -8,6 +8,7 @@ import {
   DeleteTopicUseCase,
 } from 'src/usecases/topic'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
+import { GetTopicTreeUseCase } from 'src/usecases/topic'
 
 describe('[unit] TopicService', () => {
   it('create delegates to CreateTopicUseCase.execute', async () => {
@@ -147,5 +148,33 @@ describe('[unit] TopicService', () => {
     expect(spy).toHaveBeenCalledWith('t1', 2)
     expect(res.version).toBe(2)
     spy.mockRestore()
+  })
+
+  it('getTree delegates to GetTopicTreeUseCase.execute', async () => {
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn(),
+    } as any
+    const topicRepository: ITopicRepository = {
+      upsert: jest.fn(),
+      get: jest.fn(),
+    } as any
+
+    const service = new TopicService(topicVersionRepository, topicRepository)
+
+    const spy = jest.spyOn(GetTopicTreeUseCase.prototype, 'execute').mockResolvedValue({
+      topicId: 't1',
+      name: 'Root',
+      children: [],
+    } as TopicTreeNode)
+
+    const res = await service.getTree('t1')
+
+    expect(spy).toHaveBeenCalledWith('t1')
+    expect(res).toEqual({
+      topicId: 't1',
+      name: 'Root',
+      children: [],
+    })
   })
 })

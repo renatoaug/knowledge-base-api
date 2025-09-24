@@ -20,6 +20,11 @@ export class TopicVersionRepositoryFile implements ITopicVersionRepository {
     const store = await readJsonFile<VersionStore>(VERSION_FILE, { versions: [] })
     return store.versions.find((v) => v.topicId === topicId && v.version === version)
   }
+
+  async listAll(): Promise<TopicVersion[]> {
+    const store = await readJsonFile<VersionStore>(VERSION_FILE, { versions: [] })
+    return store.versions
+  }
 }
 
 export class TopicRepositoryFile implements ITopicRepository {
@@ -35,5 +40,10 @@ export class TopicRepositoryFile implements ITopicRepository {
   async get(topicId: TopicId): Promise<Topic | undefined> {
     const store = await readJsonFile<TopicStore>(TOPIC_FILE, { topics: [] })
     return store.topics.find((t) => t.topicId === topicId)
+  }
+
+  async listAll(): Promise<Topic[]> {
+    const store = await readJsonFile<TopicStore>(TOPIC_FILE, { topics: [] })
+    return store.topics
   }
 }

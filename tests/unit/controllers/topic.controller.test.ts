@@ -141,3 +141,49 @@ describe('[unit] TopicController - get', () => {
     expect(body.id).toBeUndefined()
   })
 })
+
+describe('[unit] TopicController - getTree', () => {
+  it('returns 200 with tree payload', async () => {
+    const mockService: Partial<TopicService> = {
+      getTree: jest.fn(async () => ({
+        versionId: 'v-root-1',
+        topicId: 'root',
+        version: 1,
+        name: 'Root',
+        content: 'c',
+        parentTopicId: null,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        action: 'create',
+        performedBy: 'u-editor',
+        children: [
+          {
+            versionId: 'v-c1-1',
+            topicId: 'child-1',
+            version: 1,
+            name: 'Child 1',
+            content: 'c',
+            parentTopicId: 'root',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            action: 'create',
+            performedBy: 'u-editor',
+            children: [],
+          },
+        ],
+      })),
+    }
+
+    const controller = new TopicController(mockService as unknown as TopicService)
+
+    const req = { params: { id: 'root' } } as unknown as Request
+    const { res, statusMock, jsonMock } = createMockResponse()
+
+    await controller.getTree(req, res)
+
+    expect(statusMock).toHaveBeenCalledWith(200)
+    const body = jsonMock.mock.calls[0][0] as any
+    expect(body.topicId).toBe('root')
+    expect(Array.isArray(body.children)).toBe(true)
+  })
+})

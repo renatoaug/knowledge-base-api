@@ -29,4 +29,9 @@ export class TopicController {
     const topic = await this.service.get(req.params.id, req.query.version as number | undefined)
     res.status(200).json(this.toResponse(topic))
   }
+
+  getTree = async (req: Request, res: Response): Promise<void> => {
+    const tree = await this.service.getTree(req.params.id)
+    res.status(200).json(tree)
+  }
 }
