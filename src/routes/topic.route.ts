@@ -40,4 +40,6 @@ router.delete('/:id', auth.authenticate, auth.authorize('topic:delete'), control
 
 router.get('/:id', auth.authenticate, auth.authorize('topic:read'), controller.get)
 
+router.get('/:id/tree', auth.authenticate, auth.authorize('topic:read'), controller.getTree)
+
 export default router

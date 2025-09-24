@@ -6,6 +6,7 @@ import {
   UpdateTopicUseCase,
   DeleteTopicUseCase,
   GetTopicUseCase,
+  GetTopicTreeUseCase,
 } from 'src/usecases/topic'
 
 export interface CreateTopicInput {
@@ -44,5 +45,10 @@ export class TopicService {
   async get(topicId: TopicId, version?: number): Promise<TopicVersion> {
     const uc = new GetTopicUseCase(this.topicVersionRepository, this.topicRepository)
     return uc.execute(topicId, version)
+  }
+
+  async getTree(topicId: TopicId) {
+    const uc = new GetTopicTreeUseCase(this.topicVersionRepository, this.topicRepository)
+    return uc.execute(topicId)
   }
 }
