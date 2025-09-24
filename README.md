@@ -37,6 +37,31 @@ $ npm run seed
 $ npm run dev
 ```
 
+### Authentication for local/dev
+
+Use header: `Authorization: Bearer editor-token` (`viewer-token` or `admin-token`).
+
+Example:
+
+```bash
+curl -s -X POST http://localhost:3000/topics \
+  -H 'Authorization: Bearer editor-token' \
+  -H 'Content-Type: application/json' \
+  -d '{ "name":"Root", "content":"c", "parentTopicId":null }'
+```
+
+## Data storage (file-based database)
+
+This project uses a simple file-based persistence layer (JSON files) as the default database.
+
+- Directory: `<project-root>/data` (created automatically on first access)
+- Files:
+  - `topics.json` (topic heads: `topicId`, `latestVersion`, `deletedAt`)
+  - `topics.versions.json` (append-only topic versions)
+  - `users.json` (seeded users for auth in local/dev)
+
+No manual configuration is required; the data directory and files are created automatically when the application runs.
+
 ## Testing
 
 ```bash
@@ -44,27 +69,7 @@ $ nvm use
 $ npm run test
 ```
 
-### Authentication for local/dev
-
-Use header: `Authorization: Bearer editor-token` (`viewer-token` or `admin-token`).
-
-### Project structure
-
-```
-src/
-  app.ts
-  server.ts
-  routes/
-  controllers/
-  services/
-  models/
-  repositories/
-  middleware/
-  utils/
-  tests/
-```
-
-### Conventional commits
+## Conventional commits
 
 This repository follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Examples:
 
@@ -74,6 +79,6 @@ This repository follows [Conventional Commits](https://www.conventionalcommits.o
 - `test: add unit tests for topic service`
 - `refactor: extract permission strategy`
 
-### Husky <sub><sup>(required to commit)</sup></sub>
+## Husky <sub><sup>(required to commit)</sup></sub>
 
 We use [husky](https://www.npmjs.com/package/husky) to handle some hooks like `pre-commit` and `commit-msg`.
