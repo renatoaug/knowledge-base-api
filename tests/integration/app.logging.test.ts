@@ -2,10 +2,6 @@ import request from 'supertest'
 import app from 'src/app'
 
 describe('[integration] app logging', () => {
-  it('GET /health returns 200 (info path)', async () => {
-    await request(app).get('/health').expect(200)
-  })
-
   it('POST /topics with viewer-token returns 403 (warn path)', async () => {
     await request(app)
       .post('/topics')

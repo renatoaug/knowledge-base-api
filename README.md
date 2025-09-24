@@ -58,6 +58,10 @@ curl -s -X POST http://localhost:3000/topics \
   -d '{ "name":"Root", "content":"c", "parentTopicId":null }'
 ```
 
+## API Docs
+
+[Swagger UI](http://localhost:3000/docs)
+
 ## Data storage (file-based database)
 
 This project uses a simple file-based persistence layer (JSON files) as the default database.

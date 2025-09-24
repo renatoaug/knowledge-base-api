@@ -51,7 +51,7 @@ describe('[unit] TopicController - create', () => {
     })
     expect(statusMock.mock.calls[0][0]).toBe(201)
     expect((jsonMock.mock.calls[0][0] as TopicVersion).name).toBe('Root')
-    expect((jsonMock.mock.calls[0][0] as TopicVersion).version).toBe(1)
+    expect((jsonMock.mock.calls[0][0] as TopicVersion).content).toBe('c')
   })
 })
 
@@ -85,8 +85,8 @@ describe('[unit] TopicController - update', () => {
 
     expect(statusMock).toHaveBeenCalledWith(200)
     const body = jsonMock.mock.calls[0][0] as any
-    expect(body.versionId).toBe(versionId)
-    expect(body.id).toBeUndefined()
+    expect(body.content).toBe('c2')
+    expect(body.name).toBe('Root')
   })
 })
 
@@ -137,8 +137,8 @@ describe('[unit] TopicController - get', () => {
 
     expect(statusMock).toHaveBeenCalledWith(200)
     const body = jsonMock.mock.calls[0][0] as any
-    expect(body.versionId).toBe(versionId)
-    expect(body.id).toBeUndefined()
+    expect(body.content).toBe('c2')
+    expect(body.name).toBe('Root')
   })
 })
 

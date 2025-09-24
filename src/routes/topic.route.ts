@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { makeTopicController } from 'src/container'
-import { z } from 'zod'
+import { CreateTopicSchema, UpdateTopicSchema, ShortestPathQuery } from 'src/schemas'
 import { ValidationMiddleware, AppError } from 'src/middlewares'
 import { makeAuthMiddleware } from 'src/container'
 
@@ -8,22 +8,8 @@ const router = Router()
 const controller = makeTopicController()
 const auth = makeAuthMiddleware()
 
-const createSchema = z.object({
-  name: z.string().min(1),
-  content: z.string().min(1),
-  parentTopicId: z.uuid().nullable().optional(),
-})
-
-const updateSchema = z.object({
-  name: z.string().min(1).optional(),
-  content: z.string().min(1).optional(),
-  parentTopicId: z.uuid().nullable().optional(),
-})
-
-const shortestPathQuerySchema = z.object({
-  from: z.uuid(),
-  to: z.uuid(),
-})
+const createSchema = CreateTopicSchema
+const updateSchema = UpdateTopicSchema
 
 router.post(
   '/',
@@ -46,7 +32,7 @@ router.get(
   auth.authenticate,
   auth.authorize('topic:read'),
   (req, res, next) => {
-    const parsed = shortestPathQuerySchema.safeParse(req.query)
+    const parsed = ShortestPathQuery.safeParse(req.query)
     if (!parsed.success) {
       const errors = parsed.error.issues.map((iss) => ({
         field: iss.path.join('.') || undefined,

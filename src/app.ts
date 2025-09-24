@@ -6,6 +6,8 @@ import { ErrorMiddleware } from 'src/middlewares'
 import { RequestIdMiddleware } from 'src/middlewares'
 import pinoHttp from 'pino-http'
 import { logger } from 'src/logger'
+import swaggerUi from 'swagger-ui-express'
+import { generateOpenApi } from 'src/schemas'
 
 const app = express()
 app.use(express.json())
@@ -54,9 +56,12 @@ app.use(
   }),
 )
 
-app.get('/health', (_req, res): void => {
-  res.json({ status: 'ok' })
-})
+const openapiDoc = generateOpenApi()
+app.use(
+  '/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(openapiDoc, { swaggerOptions: { persistAuthorization: true } }),
+)
 
 app.use('/topics', topicRoute)
 
