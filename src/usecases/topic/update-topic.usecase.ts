@@ -39,6 +39,13 @@ export class UpdateTopicUseCase extends UseCase<
     )
     if (!current) throw new AppError(404, 'Topic version not found')
 
+    if (input.parentTopicId) {
+      const parentTopic = await this.topicRepository.get(input.parentTopicId)
+      if (!parentTopic || parentTopic.deletedAt) {
+        throw new AppError(400, 'Parent topic not found')
+      }
+    }
+
     const now = Date.now()
     const nextVersionNumber = head.latestVersion + 1
     const next: TopicVersion = TopicVersionFactory.fromUpdate(

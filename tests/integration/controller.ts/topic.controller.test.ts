@@ -53,6 +53,22 @@ describe('[integration] POST /topics', () => {
 
     expect(res.body.message).toBe('Forbidden')
   })
+
+  it('should validate that parentTopicId exists', async () => {
+    const nonExistentParentId = crypto.randomUUID()
+
+    const res = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({
+        name: 'Child Topic',
+        content: 'Content',
+        parentTopicId: nonExistentParentId,
+      })
+      .expect(400)
+
+    expect(res.body.message).toBe('Parent topic not found')
+  })
 })
 
 describe('[integration] PUT /topics/:id', () => {
@@ -73,6 +89,29 @@ describe('[integration] PUT /topics/:id', () => {
 
     expect(update.body.content).toBe('c2')
     expect(update.body.topicId).toBe(topicId)
+  })
+
+  it('should validate that parentTopicId exists when updating', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+    const nonExistentParentId = crypto.randomUUID()
+
+    const res = await request(app)
+      .put(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer editor-token')
+      .send({
+        name: 'Updated Topic',
+        content: 'Updated Content',
+        parentTopicId: nonExistentParentId,
+      })
+      .expect(400)
+
+    expect(res.body.message).toBe('Parent topic not found')
   })
 })
 
