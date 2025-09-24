@@ -38,6 +38,7 @@ export const ResourceSchema = z
 registry.registerPath({
   method: 'post',
   path: '/resources',
+  tags: ['Resources'],
   summary: 'Create resource',
   request: { body: { content: { 'application/json': { schema: CreateResourceSchema } } } },
   security: [{ BearerAuth: [] }],
@@ -51,6 +52,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'put',
   path: '/resources/{id}',
+  tags: ['Resources'],
   summary: 'Update resource',
   request: {
     params: ResourceIdParam,
@@ -68,6 +70,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'delete',
   path: '/resources/{id}',
+  tags: ['Resources'],
   summary: 'Delete resource',
   request: { params: ResourceIdParam },
   security: [{ BearerAuth: [] }],
@@ -82,6 +85,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'get',
   path: '/resources/{id}',
+  tags: ['Resources'],
   summary: 'Get resource',
   request: { params: ResourceIdParam },
   security: [{ BearerAuth: [] }],
@@ -96,6 +100,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'get',
   path: '/topics/{id}/resources',
+  tags: ['Resources'],
   summary: 'List resources by topic',
   request: { params: z.object({ id: z.uuid() }) },
   security: [{ BearerAuth: [] }],

@@ -51,6 +51,7 @@ registry.registerComponent('securitySchemes', 'BearerAuth', {
 registry.registerPath({
   method: 'post',
   path: '/topics',
+  tags: ['Topics'],
   summary: 'Create topic',
   request: { body: { content: { 'application/json': { schema: CreateTopicSchema } } } },
   security: [{ BearerAuth: [] }],
@@ -64,6 +65,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'put',
   path: '/topics/{id}',
+  tags: ['Topics'],
   summary: 'Update topic',
   request: {
     params: TopicIdParam,
@@ -81,6 +83,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'delete',
   path: '/topics/{id}',
+  tags: ['Topics'],
   summary: 'Delete topic',
   request: { params: TopicIdParam },
   security: [{ BearerAuth: [] }],
@@ -95,6 +98,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'get',
   path: '/topics/{id}',
+  tags: ['Topics'],
   summary: 'Get topic (latest or specific version)',
   request: { params: TopicIdParam, query: VersionQuery },
   security: [{ BearerAuth: [] }],
@@ -109,6 +113,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'get',
   path: '/topics/{id}/tree',
+  tags: ['Topics'],
   summary: 'Get topic tree',
   request: { params: TopicIdParam },
   security: [{ BearerAuth: [] }],
@@ -123,6 +128,7 @@ registry.registerPath({
 registry.registerPath({
   method: 'get',
   path: '/topics/shortest_path',
+  tags: ['Topics'],
   summary: 'Shortest path (BFS)',
   request: { query: ShortestPathQuery },
   security: [{ BearerAuth: [] }],
@@ -152,5 +158,9 @@ export function generateOpenApi() {
     },
     servers: [{ url: 'http://localhost:3000' }],
     security: [{ BearerAuth: [] }],
+    tags: [
+      { name: 'Topics', description: 'Topic management' },
+      { name: 'Resources', description: 'Resources linked to topics' },
+    ],
   })
 }
