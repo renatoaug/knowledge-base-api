@@ -1,6 +1,7 @@
 import { ResourceService } from 'src/services'
 import { IResourceRepository, ITopicRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
+import { ResourceType } from 'src/models'
 
 describe('[unit] ResourceService', () => {
   const fixedNow = 1716768123456
@@ -39,7 +40,7 @@ describe('[unit] ResourceService', () => {
       topicId: 't1',
       url: 'https://example.com',
       description: 'Great article',
-      type: 'article',
+      type: ResourceType.ARTICLE,
     })
 
     expect(resources.create).toHaveBeenCalled()
@@ -52,12 +53,22 @@ describe('[unit] ResourceService', () => {
   it('create: throws 404 if topic not found or deleted', async () => {
     topics.get.mockResolvedValue(undefined)
     await expect(
-      service.create({ topicId: 't1', url: 'https://e.com', description: 'd', type: 'link' }),
+      service.create({
+        topicId: 't1',
+        url: 'https://e.com',
+        description: 'd',
+        type: ResourceType.LINK,
+      }),
     ).rejects.toBeInstanceOf(AppError)
 
     topics.get.mockResolvedValue({ topicId: 't1', latestVersion: 1, deletedAt: fixedNow })
     await expect(
-      service.create({ topicId: 't1', url: 'https://e.com', description: 'd', type: 'link' }),
+      service.create({
+        topicId: 't1',
+        url: 'https://e.com',
+        description: 'd',
+        type: ResourceType.LINK,
+      }),
     ).rejects.toBeInstanceOf(AppError)
   })
 
@@ -67,7 +78,7 @@ describe('[unit] ResourceService', () => {
       topicId: 't1',
       url: 'https://old',
       description: 'old',
-      type: 'article',
+      type: ResourceType.ARTICLE,
       createdAt: fixedNow - 1000,
       updatedAt: fixedNow - 1000,
     })
@@ -89,7 +100,7 @@ describe('[unit] ResourceService', () => {
       topicId: 't1',
       url: 'https://old',
       description: 'old',
-      type: 'article',
+      type: ResourceType.ARTICLE,
       createdAt: fixedNow - 1000,
       updatedAt: fixedNow - 1000,
     })
@@ -109,7 +120,7 @@ describe('[unit] ResourceService', () => {
       topicId: 't1',
       url: 'https://old',
       description: 'old',
-      type: 'article',
+      type: ResourceType.ARTICLE,
       createdAt: fixedNow - 1000,
       updatedAt: fixedNow - 1000,
     })
@@ -131,7 +142,7 @@ describe('[unit] ResourceService', () => {
         topicId: 't1',
         url: 'https://a',
         description: 'd',
-        type: 'link',
+        type: ResourceType.LINK,
         createdAt: fixedNow - 2,
         updatedAt: fixedNow - 1,
       },
