@@ -42,7 +42,7 @@ router.put(
 )
 
 router.get(
-  '/shortest-path',
+  '/shortest_path',
   auth.authenticate,
   auth.authorize('topic:read'),
   (req, res, next) => {
