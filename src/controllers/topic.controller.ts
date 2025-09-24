@@ -5,9 +5,11 @@ import { TopicVersion } from 'src/models'
 export class TopicController {
   constructor(private readonly service: TopicService) {}
 
-  private toResponse(version: TopicVersion): Omit<TopicVersion, 'id'> & { versionId: string } {
-    const { id, ...rest } = version
-    return { versionId: id, ...rest }
+  private toResponse(
+    version: TopicVersion,
+  ): Omit<TopicVersion, 'id' | 'version' | 'action' | 'performedBy'> {
+    const { topicId, name, content, parentTopicId, createdAt, updatedAt } = version
+    return { topicId, name, content, parentTopicId, createdAt, updatedAt }
   }
 
   create = async (req: Request, res: Response): Promise<void> => {

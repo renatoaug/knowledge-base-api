@@ -11,16 +11,12 @@ describe('[integration] POST /topics', () => {
       .expect(201)
 
     const body = res.body
-    expect(typeof body.versionId).toBe('string')
     expect(typeof body.topicId).toBe('string')
-    expect(body.version).toBe(1)
     expect(body.name).toBe('Root')
     expect(body.content).toBe('c')
     expect(body.parentTopicId).toBeNull()
     expect(typeof body.createdAt).toBe('number')
     expect(body.updatedAt).toBe(body.createdAt)
-    expect(body.action).toBe('create')
-    expect(body.performedBy).toBe('u-editor')
   })
 
   it('returns 400 when body is missing required fields', async () => {
@@ -75,9 +71,8 @@ describe('[integration] PUT /topics/:id', () => {
       .send({ content: 'c2' })
       .expect(200)
 
-    expect(update.body.version).toBe(2)
     expect(update.body.content).toBe('c2')
-    expect(update.body.performedBy).toBe('u-editor')
+    expect(update.body.topicId).toBe(topicId)
   })
 })
 
@@ -117,9 +112,7 @@ describe('[integration] GET /topics/:id', () => {
       .set('Authorization', 'Bearer viewer-token')
       .expect(200)
 
-    expect(res.body.versionId).toBeTruthy()
     expect(res.body.id).toBeUndefined()
-    expect(res.body.version).toBe(1)
     expect(res.body.name).toBe('Root')
   })
 
@@ -138,15 +131,12 @@ describe('[integration] GET /topics/:id', () => {
       .send({ content: 'c2' })
       .expect(200)
 
-    expect(update.body.version).toBe(2)
-
     const res = await request(app)
       .get(`/topics/${topicId}?version=2`)
       .set('Authorization', 'Bearer viewer-token')
       .expect(200)
 
-    expect(res.body.version).toBe(2)
-    expect(res.body.content).toBe('c2')
+    expect(res.body.content).toBe(update.body.content)
   })
 
   it('returns 400 when version is not a number', async () => {
