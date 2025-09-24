@@ -114,4 +114,140 @@ describe('[unit] UpdateTopicUseCase', () => {
     const r2 = await uc.execute({ topicId: 't', input: { content: 'C2' }, performedByUserId: 'u' })
     expect(r2.parentTopicId).toBe('p1')
   })
+
+  it('validates that parent topic exists when parentTopicId is provided', async () => {
+    const topicId = 't1'
+    const head = { topicId, latestVersion: 1, deletedAt: null }
+    const v1: TopicVersion = {
+      id: 'v1',
+      topicId,
+      version: 1,
+      name: 'Root',
+      content: 'c',
+      parentTopicId: null,
+      createdAt: Date.now() - 1000,
+      updatedAt: Date.now() - 1000,
+      action: TopicAction.CREATE,
+      performedBy: 'u-editor',
+    }
+
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn().mockResolvedValue(v1),
+    } as any
+
+    const topicRepository: ITopicRepository = {
+      upsert: jest.fn(),
+      get: jest.fn().mockResolvedValueOnce(head).mockResolvedValueOnce(undefined),
+    } as any
+
+    const uc = new UpdateTopicUseCase(topicVersionRepository, topicRepository)
+
+    await expect(
+      uc.execute({
+        topicId,
+        input: { name: 'Updated', parentTopicId: 'non-existent-parent' },
+        performedByUserId: 'u-editor',
+      }),
+    ).rejects.toBeInstanceOf(AppError)
+
+    expect((topicRepository.get as jest.Mock).mock.calls.length).toBe(2)
+    expect((topicRepository.get as jest.Mock).mock.calls[1][0]).toBe('non-existent-parent')
+    expect((topicVersionRepository.append as jest.Mock).mock.calls.length).toBe(0)
+    expect((topicRepository.upsert as jest.Mock).mock.calls.length).toBe(0)
+  })
+
+  it('validates that parent topic is not deleted when parentTopicId is provided', async () => {
+    const topicId = 't1'
+    const head = { topicId, latestVersion: 1, deletedAt: null }
+    const v1: TopicVersion = {
+      id: 'v1',
+      topicId,
+      version: 1,
+      name: 'Root',
+      content: 'c',
+      parentTopicId: null,
+      createdAt: Date.now() - 1000,
+      updatedAt: Date.now() - 1000,
+      action: TopicAction.CREATE,
+      performedBy: 'u-editor',
+    }
+
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn().mockResolvedValue(v1),
+    } as any
+
+    const topicRepository: ITopicRepository = {
+      upsert: jest.fn(),
+      get: jest.fn().mockResolvedValueOnce(head).mockResolvedValueOnce({
+        topicId: 'parent-id',
+        latestVersion: 1,
+        deletedAt: Date.now(),
+      }),
+    } as any
+
+    const uc = new UpdateTopicUseCase(topicVersionRepository, topicRepository)
+
+    await expect(
+      uc.execute({
+        topicId,
+        input: { name: 'Updated', parentTopicId: 'deleted-parent' },
+        performedByUserId: 'u-editor',
+      }),
+    ).rejects.toBeInstanceOf(AppError)
+
+    expect((topicRepository.get as jest.Mock).mock.calls.length).toBe(2)
+    expect((topicRepository.get as jest.Mock).mock.calls[1][0]).toBe('deleted-parent')
+    expect((topicVersionRepository.append as jest.Mock).mock.calls.length).toBe(0)
+    expect((topicRepository.upsert as jest.Mock).mock.calls.length).toBe(0)
+  })
+
+  it('allows updating topic with valid parentTopicId', async () => {
+    const topicId = 't1'
+    const head = { topicId, latestVersion: 1, deletedAt: null }
+    const v1: TopicVersion = {
+      id: 'v1',
+      topicId,
+      version: 1,
+      name: 'Root',
+      content: 'c',
+      parentTopicId: null,
+      createdAt: Date.now() - 1000,
+      updatedAt: Date.now() - 1000,
+      action: TopicAction.CREATE,
+      performedBy: 'u-editor',
+    }
+
+    const versions: TopicVersion[] = [v1]
+    const updatedHeads: Topic[] = []
+
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(async (v) => versions.push(v)),
+      getByTopicAndVersion: jest.fn().mockResolvedValue(v1),
+    } as any
+
+    const topicRepository: ITopicRepository = {
+      upsert: jest.fn(async (t) => updatedHeads.push(t)),
+      get: jest.fn().mockResolvedValueOnce(head).mockResolvedValueOnce({
+        topicId: 'parent-id',
+        latestVersion: 1,
+        deletedAt: null,
+      }),
+    } as any
+
+    const uc = new UpdateTopicUseCase(topicVersionRepository, topicRepository)
+    const res = await uc.execute({
+      topicId,
+      input: { name: 'Updated', parentTopicId: 'valid-parent' },
+      performedByUserId: 'u-editor',
+    })
+
+    expect(res.version).toBe(2)
+    expect(res.action).toBe(TopicAction.UPDATE)
+    expect(res.parentTopicId).toBe('valid-parent')
+    expect((topicRepository.get as jest.Mock).mock.calls.length).toBe(2)
+    expect((topicVersionRepository.append as jest.Mock).mock.calls.length).toBe(1)
+    expect((topicRepository.upsert as jest.Mock).mock.calls.length).toBe(1)
+  })
 })

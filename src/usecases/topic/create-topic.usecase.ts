@@ -2,6 +2,7 @@ import { UseCase } from 'src/usecases'
 import { TopicId, TopicVersion } from 'src/models'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { TopicVersionFactory } from 'src/usecases/topic'
+import { AppError } from 'src/middlewares'
 
 export interface CreateTopicInput {
   name: string
@@ -27,6 +28,13 @@ export class CreateTopicUseCase extends UseCase<
     input: CreateTopicInput
     performedByUserId: string
   }): Promise<TopicVersion> {
+    if (input.parentTopicId) {
+      const parentTopic = await this.topicRepository.get(input.parentTopicId)
+      if (!parentTopic || parentTopic.deletedAt) {
+        throw new AppError(400, 'Parent topic not found')
+      }
+    }
+
     const now = Date.now()
     const topicId = (await import('node:crypto')).randomUUID()
     const version = TopicVersionFactory.fromCreate(
