@@ -30,6 +30,13 @@ export class ResourceRepositoryFile implements IResourceRepository {
     await writeJsonFile(RESOURCE_FILE, { resources: next })
   }
 
+  async deleteByTopic(topicId: string): Promise<void> {
+    const store = await readJsonFile<ResourceStore>(RESOURCE_FILE, { resources: [] })
+    const next = store.resources.filter((r) => r.topicId !== topicId)
+
+    await writeJsonFile(RESOURCE_FILE, { resources: next })
+  }
+
   async get(resourceId: ResourceId): Promise<Resource | undefined> {
     const store = await readJsonFile<ResourceStore>(RESOURCE_FILE, { resources: [] })
     return store.resources.find((r) => r.id === resourceId)

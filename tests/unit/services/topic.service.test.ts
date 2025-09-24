@@ -7,7 +7,7 @@ import {
   GetTopicUseCase,
   DeleteTopicUseCase,
 } from 'src/usecases/topic'
-import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
+import { ITopicRepository, ITopicVersionRepository, IResourceRepository } from 'src/repositories'
 import { GetTopicTreeUseCase } from 'src/usecases/topic'
 
 describe('[unit] TopicService', () => {
@@ -20,8 +20,16 @@ describe('[unit] TopicService', () => {
       upsert: jest.fn(),
       get: jest.fn(),
     } as any
+    const resourceRepository: IResourceRepository = {
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteByTopic: jest.fn(),
+      get: jest.fn(),
+      listByTopic: jest.fn(),
+    } as any
 
-    const service = new TopicService(topicVersionRepository, topicRepository)
+    const service = new TopicService(topicVersionRepository, topicRepository, resourceRepository)
     const user: User = {
       id: 'u-editor',
       name: 'Editor',
@@ -60,8 +68,16 @@ describe('[unit] TopicService', () => {
       upsert: jest.fn(),
       get: jest.fn(),
     } as any
+    const resourceRepository: IResourceRepository = {
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteByTopic: jest.fn(),
+      get: jest.fn(),
+      listByTopic: jest.fn(),
+    } as any
 
-    const service = new TopicService(topicVersionRepository, topicRepository)
+    const service = new TopicService(topicVersionRepository, topicRepository, resourceRepository)
     const user: User = {
       id: 'u-editor',
       name: 'Editor',
@@ -111,8 +127,16 @@ describe('[unit] TopicService', () => {
       upsert: jest.fn(),
       get: jest.fn(),
     } as any
+    const resourceRepository: IResourceRepository = {
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteByTopic: jest.fn(),
+      get: jest.fn(),
+      listByTopic: jest.fn(),
+    } as any
 
-    const service = new TopicService(topicVersionRepository, topicRepository)
+    const service = new TopicService(topicVersionRepository, topicRepository, resourceRepository)
 
     const spy = jest.spyOn(DeleteTopicUseCase.prototype, 'execute').mockResolvedValue()
 
@@ -131,8 +155,16 @@ describe('[unit] TopicService', () => {
       upsert: jest.fn(),
       get: jest.fn(),
     } as any
+    const resourceRepository: IResourceRepository = {
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteByTopic: jest.fn(),
+      get: jest.fn(),
+      listByTopic: jest.fn(),
+    } as any
 
-    const service = new TopicService(topicVersionRepository, topicRepository)
+    const service = new TopicService(topicVersionRepository, topicRepository, resourceRepository)
 
     const spy = jest.spyOn(GetTopicUseCase.prototype, 'execute').mockResolvedValue({
       id: 'v2',
@@ -163,8 +195,16 @@ describe('[unit] TopicService', () => {
       upsert: jest.fn(),
       get: jest.fn(),
     } as any
+    const resourceRepository: IResourceRepository = {
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteByTopic: jest.fn(),
+      get: jest.fn(),
+      listByTopic: jest.fn(),
+    } as any
 
-    const service = new TopicService(topicVersionRepository, topicRepository)
+    const service = new TopicService(topicVersionRepository, topicRepository, resourceRepository)
 
     const spy = jest.spyOn(GetTopicTreeUseCase.prototype, 'execute').mockResolvedValue({
       topicId: 't1',

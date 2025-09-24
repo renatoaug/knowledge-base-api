@@ -95,6 +95,71 @@ describe('[integration] DELETE /topics/:id', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(expected)
   })
+
+  it('deletes associated resources when topic is deleted', async () => {
+    const { ResourceType } = await import('src/models')
+
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    const resource1 = await request(app)
+      .post('/resources')
+      .set('Authorization', 'Bearer editor-token')
+      .send({
+        topicId,
+        url: 'https://example1.com',
+        description: 'Resource 1',
+        type: ResourceType.LINK,
+      })
+      .expect(201)
+
+    const resource2 = await request(app)
+      .post('/resources')
+      .set('Authorization', 'Bearer editor-token')
+      .send({
+        topicId,
+        url: 'https://example2.com',
+        description: 'Resource 2',
+        type: ResourceType.ARTICLE,
+      })
+      .expect(201)
+
+    // Verify resources exist
+    const listBefore = await request(app)
+      .get(`/topics/${topicId}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    expect(listBefore.body).toHaveLength(2)
+
+    // Delete topic
+    await request(app)
+      .delete(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer admin-token')
+      .expect(204)
+
+    // Verify that listing resources for deleted topic returns 404
+    await request(app)
+      .get(`/topics/${topicId}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    // Verify individual resources are gone (cascade delete worked)
+    await request(app)
+      .get(`/resources/${resource1.body.id}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    await request(app)
+      .get(`/resources/${resource2.body.id}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+  })
 })
 
 describe('[integration] GET /topics/:id', () => {

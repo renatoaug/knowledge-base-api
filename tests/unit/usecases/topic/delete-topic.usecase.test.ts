@@ -1,6 +1,6 @@
 import { DeleteTopicUseCase } from 'src/usecases/topic'
 import { Topic, TopicVersion, TopicAction } from 'src/models'
-import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
+import { ITopicRepository, ITopicVersionRepository, IResourceRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
 
 describe('[unit] DeleteTopicUseCase', () => {
@@ -33,7 +33,11 @@ describe('[unit] DeleteTopicUseCase', () => {
       }),
     } as any
 
-    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
+    const resourceRepository: IResourceRepository = {
+      deleteByTopic: jest.fn(async () => {}),
+    } as any
+
+    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository, resourceRepository)
     await uc.execute({ topicId, performedByUserId: 'u-admin' })
 
     expect((topicVersionRepository.append as jest.Mock).mock.calls.length).toBe(1)
@@ -47,6 +51,9 @@ describe('[unit] DeleteTopicUseCase', () => {
     expect(upserted!.topicId).toBe(topicId)
     expect(upserted!.latestVersion).toBe(2)
     expect(typeof upserted!.deletedAt).toBe('number')
+
+    expect((resourceRepository.deleteByTopic as jest.Mock).mock.calls.length).toBe(1)
+    expect((resourceRepository.deleteByTopic as jest.Mock).mock.calls[0][0]).toBe(topicId)
   })
 
   it('throws 404 when head not found', async () => {
@@ -58,7 +65,10 @@ describe('[unit] DeleteTopicUseCase', () => {
       get: jest.fn(async () => undefined),
       upsert: jest.fn(),
     } as any
-    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
+    const resourceRepository: IResourceRepository = {
+      deleteByTopic: jest.fn(),
+    } as any
+    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository, resourceRepository)
     await expect(uc.execute({ topicId: 't1', performedByUserId: 'u' })).rejects.toBeInstanceOf(
       AppError,
     )
@@ -74,7 +84,10 @@ describe('[unit] DeleteTopicUseCase', () => {
       get: jest.fn(async () => head),
       upsert: jest.fn(),
     } as any
-    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
+    const resourceRepository: IResourceRepository = {
+      deleteByTopic: jest.fn(),
+    } as any
+    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository, resourceRepository)
     await expect(uc.execute({ topicId: 't1', performedByUserId: 'u' })).rejects.toBeInstanceOf(
       AppError,
     )
@@ -90,7 +103,10 @@ describe('[unit] DeleteTopicUseCase', () => {
       get: jest.fn(async () => head),
       upsert: jest.fn(),
     } as any
-    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
+    const resourceRepository: IResourceRepository = {
+      deleteByTopic: jest.fn(),
+    } as any
+    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository, resourceRepository)
     await expect(uc.execute({ topicId: 't1', performedByUserId: 'u' })).rejects.toBeInstanceOf(
       AppError,
     )

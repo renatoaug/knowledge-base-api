@@ -7,9 +7,12 @@ import { ResourceController } from 'src/controllers'
 import { ResourceService } from 'src/services'
 
 export function makeTopicController(): TopicController {
-  const { topicRepository: topics, topicVersionRepository: topicVersions } =
-    makeTopicRepositories('file')
-  const service = new TopicService(topicVersions, topics)
+  const {
+    topicRepository: topics,
+    topicVersionRepository: topicVersions,
+    resourceRepository: resources,
+  } = makeTopicRepositories('file')
+  const service = new TopicService(topicVersions, topics, resources)
 
   return new TopicController(service)
 }
