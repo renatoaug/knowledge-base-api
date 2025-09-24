@@ -259,6 +259,28 @@ describe('[integration] GET /topics/:id', () => {
 
     expect(res.body.message).toBe('Version must be a number')
   })
+
+  it('returns 404 when trying to access specific version of deleted topic', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    await request(app)
+      .delete(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer admin-token')
+      .expect(204)
+
+    const res = await request(app)
+      .get(`/topics/${topicId}?version=1`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    expect(res.body.message).toBe('Topic not found')
+  })
 })
 
 describe('[integration] GET /topics/:id/tree', () => {
