@@ -166,3 +166,54 @@ describe('[integration] GET /topics/:id', () => {
     expect(res.body.message).toBe('Version must be a number')
   })
 })
+
+describe('[integration] GET /topics/:id/tree', () => {
+  it('returns 200 with a tree structure (root -> child -> grandchild)', async () => {
+    const root = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const rootId = root.body.topicId
+
+    const child = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Child', content: 'c', parentTopicId: rootId })
+      .expect(201)
+
+    const childId = child.body.topicId
+
+    const grandchild = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Grandchild', content: 'c', parentTopicId: childId })
+      .expect(201)
+
+    const grandchildId = grandchild.body.topicId
+
+    const res = await request(app)
+      .get(`/topics/${rootId}/tree`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    expect(res.body).toEqual({
+      topicId: rootId,
+      name: 'Root',
+      children: [
+        {
+          topicId: childId,
+          name: 'Child',
+          children: [
+            {
+              topicId: grandchildId,
+              name: 'Grandchild',
+              children: [],
+            },
+          ],
+        },
+      ],
+    })
+  })
+})
