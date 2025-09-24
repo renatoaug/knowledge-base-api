@@ -34,4 +34,12 @@ export class TopicController {
     const tree = await this.service.getTree(req.params.id)
     res.status(200).json(tree)
   }
+
+  getShortestPath = async (req: Request, res: Response): Promise<void> => {
+    const q = (res.locals as { shortestPathQuery?: { from: string; to: string } }).shortestPathQuery
+    const fromId = (q?.from ?? (req.query.from as string)) as string
+    const toId = (q?.to ?? (req.query.to as string)) as string
+    const result = await this.service.getShortestPath(fromId, toId)
+    res.status(200).json(result)
+  }
 }

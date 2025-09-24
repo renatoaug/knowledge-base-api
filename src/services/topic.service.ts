@@ -7,6 +7,7 @@ import {
   DeleteTopicUseCase,
   GetTopicUseCase,
   GetTopicTreeUseCase,
+  GetShortestPathUseCase,
 } from 'src/usecases/topic'
 import { TopicTreeNode } from 'src/models/topic'
 
@@ -51,5 +52,13 @@ export class TopicService {
   async getTree(topicId: TopicId): Promise<TopicTreeNode> {
     const uc = new GetTopicTreeUseCase(this.topicVersionRepository, this.topicRepository)
     return uc.execute(topicId)
+  }
+
+  async getShortestPath(
+    fromId: TopicId,
+    toId: TopicId,
+  ): Promise<{ path: { topicId: TopicId; name: string }[] }> {
+    const uc = new GetShortestPathUseCase(this.topicVersionRepository, this.topicRepository)
+    return uc.execute(fromId, toId)
   }
 }
