@@ -1,7 +1,7 @@
-import crypto from 'node:crypto'
-import { TopicAction, TopicId, TopicVersion } from 'src/models'
+import { TopicId, TopicVersion } from 'src/models'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
+import { TopicVersionFactory } from 'src/usecases/topic'
 
 export interface UpdateTopicInput {
   name?: string
@@ -31,19 +31,19 @@ export class UpdateTopicUseCase {
 
     const now = Date.now()
     const nextVersionNumber = head.latestVersion + 1
-    const next: TopicVersion = {
-      id: crypto.randomUUID(),
+    const next: TopicVersion = TopicVersionFactory.fromUpdate(
       topicId,
-      version: nextVersionNumber,
-      name: input.name ?? current.name,
-      content: input.content ?? current.content,
-      parentTopicId:
-        input.parentTopicId === undefined ? current.parentTopicId : input.parentTopicId,
-      createdAt: current.createdAt,
-      updatedAt: now,
-      action: TopicAction.UPDATE,
-      performedBy: performedByUserId,
-    }
+      nextVersionNumber,
+      current,
+      {
+        name: input.name ?? undefined,
+        content: input.content ?? undefined,
+        parentTopicId:
+          input.parentTopicId === undefined ? undefined : (input.parentTopicId ?? null),
+      },
+      now,
+      performedByUserId,
+    )
 
     await this.topicVersionRepository.append(next)
     await this.topicRepository.upsert({
