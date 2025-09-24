@@ -25,25 +25,31 @@ export class ResourceRepositoryFile implements IResourceRepository {
 
   async delete(resourceId: ResourceId): Promise<void> {
     const store = await readJsonFile<ResourceStore>(RESOURCE_FILE, { resources: [] })
-    const next = store.resources.filter((r) => r.id !== resourceId)
+    const now = Date.now()
 
-    await writeJsonFile(RESOURCE_FILE, { resources: next })
+    const updated = store.resources.map((r) => (r.id === resourceId ? { ...r, deletedAt: now } : r))
+
+    await writeJsonFile(RESOURCE_FILE, { resources: updated })
   }
 
   async deleteByTopic(topicId: string): Promise<void> {
     const store = await readJsonFile<ResourceStore>(RESOURCE_FILE, { resources: [] })
-    const next = store.resources.filter((r) => r.topicId !== topicId)
+    const now = Date.now()
 
-    await writeJsonFile(RESOURCE_FILE, { resources: next })
+    const updated = store.resources.map((r) =>
+      r.topicId === topicId ? { ...r, deletedAt: now } : r,
+    )
+
+    await writeJsonFile(RESOURCE_FILE, { resources: updated })
   }
 
   async get(resourceId: ResourceId): Promise<Resource | undefined> {
     const store = await readJsonFile<ResourceStore>(RESOURCE_FILE, { resources: [] })
-    return store.resources.find((r) => r.id === resourceId)
+    return store.resources.find((r) => r.id === resourceId && !r.deletedAt)
   }
 
   async listByTopic(topicId: string): Promise<Resource[]> {
     const store = await readJsonFile<ResourceStore>(RESOURCE_FILE, { resources: [] })
-    return store.resources.filter((r) => r.topicId === topicId)
+    return store.resources.filter((r) => r.topicId === topicId && !r.deletedAt)
   }
 }
