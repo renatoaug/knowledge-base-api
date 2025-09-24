@@ -1,13 +1,14 @@
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import pinoHttp from 'pino-http'
+import swaggerUi from 'swagger-ui-express'
 import { topicRoute } from 'src/routes'
 import { ErrorMiddleware } from 'src/middlewares'
 import { RequestIdMiddleware } from 'src/middlewares'
-import pinoHttp from 'pino-http'
 import { logger } from 'src/logger'
-import swaggerUi from 'swagger-ui-express'
 import { generateOpenApi } from 'src/schemas'
+import { resourceRoute } from 'src/routes'
 
 const app = express()
 app.use(express.json())
@@ -64,6 +65,7 @@ app.use(
 )
 
 app.use('/topics', topicRoute)
+app.use('/resources', resourceRoute)
 
 app.use(ErrorMiddleware.handle)
 

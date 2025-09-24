@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { makeTopicController } from 'src/container'
+import { makeTopicController, makeAuthMiddleware } from 'src/container'
 import { CreateTopicSchema, UpdateTopicSchema, ShortestPathQuery } from 'src/schemas'
 import { ValidationMiddleware, AppError } from 'src/middlewares'
-import { makeAuthMiddleware } from 'src/container'
+import topicResourcesRoute from './topic.resources.route'
 
 const router = Router()
 const controller = makeTopicController()
@@ -54,5 +54,7 @@ router.delete('/:id', auth.authenticate, auth.authorize('topic:delete'), control
 router.get('/:id', auth.authenticate, auth.authorize('topic:read'), controller.get)
 
 router.get('/:id/tree', auth.authenticate, auth.authorize('topic:read'), controller.getTree)
+
+router.use('/:id/resources', topicResourcesRoute)
 
 export default router
