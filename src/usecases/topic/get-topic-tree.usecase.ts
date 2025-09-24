@@ -1,12 +1,15 @@
 import { TopicId, TopicTreeNode, TopicVersion } from 'src/models/topic'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
+import { UseCase } from 'src/usecases'
 
-export class GetTopicTreeUseCase {
+export class GetTopicTreeUseCase extends UseCase<TopicId, TopicTreeNode> {
   constructor(
     private readonly topicVersionRepository: ITopicVersionRepository,
     private readonly topicRepository: ITopicRepository,
-  ) {}
+  ) {
+    super()
+  }
 
   private computeLatestByTopic(versions: TopicVersion[]): Map<string, TopicVersion> {
     const latest = new Map<string, TopicVersion>()

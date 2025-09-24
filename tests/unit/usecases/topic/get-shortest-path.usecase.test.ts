@@ -68,7 +68,7 @@ describe('[unit] GetShortestPathUseCase', () => {
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
 
-    const res = await uc.execute(rootId, grandId)
+    const res = await uc.execute({ fromId: rootId, toId: grandId })
     expect(res.path.map((p) => p.topicId)).toEqual([rootId, childId, grandId])
     expect(res.path.map((p) => p.name)).toEqual(['Root', 'Child', 'Grand'])
   })
@@ -109,7 +109,9 @@ describe('[unit] GetShortestPathUseCase', () => {
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
 
-    await expect(uc.execute(a, b)).rejects.toMatchObject({ message: 'Path not found' })
+    await expect(uc.execute({ fromId: a, toId: b })).rejects.toMatchObject({
+      message: 'Path not found',
+    })
   })
 
   it('returns single node path when from===to', async () => {
@@ -132,7 +134,7 @@ describe('[unit] GetShortestPathUseCase', () => {
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
 
-    const res = await uc.execute(a, a)
+    const res = await uc.execute({ fromId: a, toId: a })
     expect(res.path).toEqual([{ topicId: a, name: 'A' }])
   })
 
@@ -141,7 +143,7 @@ describe('[unit] GetShortestPathUseCase', () => {
     const versions: TopicVersion[] = []
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
-    await expect(uc.execute('x', 'y')).rejects.toBeInstanceOf(AppError)
+    await expect(uc.execute({ fromId: 'x', toId: 'y' })).rejects.toBeInstanceOf(AppError)
   })
 
   it('throws 404 Topic version not found when from===to but latest version is missing', async () => {
@@ -150,7 +152,9 @@ describe('[unit] GetShortestPathUseCase', () => {
     const versions: TopicVersion[] = []
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
-    await expect(uc.execute(a, a)).rejects.toMatchObject({ message: 'Topic version not found' })
+    await expect(uc.execute({ fromId: a, toId: a })).rejects.toMatchObject({
+      message: 'Topic version not found',
+    })
   })
 
   it('throws 404 Topic version not found when one of the latest versions is missing (from!=to)', async () => {
@@ -176,7 +180,9 @@ describe('[unit] GetShortestPathUseCase', () => {
     ]
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
-    await expect(uc.execute(a, b)).rejects.toMatchObject({ message: 'Topic version not found' })
+    await expect(uc.execute({ fromId: a, toId: b })).rejects.toMatchObject({
+      message: 'Topic version not found',
+    })
   })
 
   it('throws 404 Topic not found when from head is deleted', async () => {
@@ -189,7 +195,9 @@ describe('[unit] GetShortestPathUseCase', () => {
     const versions: TopicVersion[] = []
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
-    await expect(uc.execute(a, b)).rejects.toMatchObject({ message: 'Topic not found' })
+    await expect(uc.execute({ fromId: a, toId: b })).rejects.toMatchObject({
+      message: 'Topic not found',
+    })
   })
 
   it('uses latest versions (renamed nodes and updated parents) to build path and labels', async () => {
@@ -279,7 +287,7 @@ describe('[unit] GetShortestPathUseCase', () => {
     ]
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
-    const res = await uc.execute(b, f)
+    const res = await uc.execute({ fromId: b, toId: f })
     expect(res.path.map((p) => p.topicId)).toEqual([b, r, c, f])
     expect(res.path.map((p) => p.name)).toEqual(['B2', 'R', 'C2', 'F'])
   })
@@ -319,7 +327,7 @@ describe('[unit] GetShortestPathUseCase', () => {
     ]
     const { topicVersionRepository, topicRepository } = makeRepos(versions, heads)
     const uc = new GetShortestPathUseCase(topicVersionRepository, topicRepository)
-    const res = await uc.execute(b, r)
+    const res = await uc.execute({ fromId: b, toId: r })
     expect(res.path.map((p) => p.topicId)).toEqual([b, r])
     expect(res.path.map((p) => p.name)).toEqual(['B', 'R'])
   })

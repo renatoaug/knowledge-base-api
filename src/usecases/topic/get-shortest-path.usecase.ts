@@ -1,17 +1,23 @@
 import { TopicId, TopicVersion } from 'src/models/topic'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
+import { UseCase } from 'src/usecases'
 
 interface PathNode {
   topicId: TopicId
   name: string
 }
 
-export class GetShortestPathUseCase {
+export class GetShortestPathUseCase extends UseCase<
+  { fromId: TopicId; toId: TopicId },
+  { path: PathNode[] }
+> {
   constructor(
     private readonly topicVersionRepository: ITopicVersionRepository,
     private readonly topicRepository: ITopicRepository,
-  ) {}
+  ) {
+    super()
+  }
 
   private computeLatestByTopic(versions: TopicVersion[]): Map<string, TopicVersion> {
     const latest = new Map<string, TopicVersion>()
@@ -60,7 +66,13 @@ export class GetShortestPathUseCase {
     return path
   }
 
-  async execute(fromId: TopicId, toId: TopicId): Promise<{ path: PathNode[] }> {
+  async execute({
+    fromId,
+    toId,
+  }: {
+    fromId: TopicId
+    toId: TopicId
+  }): Promise<{ path: PathNode[] }> {
     if (fromId === toId) {
       const head = await this.topicRepository.get(fromId)
       if (!head || head.deletedAt) throw new AppError(404, 'Topic not found')

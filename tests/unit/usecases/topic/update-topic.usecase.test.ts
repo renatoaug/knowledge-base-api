@@ -34,7 +34,11 @@ describe('[unit] UpdateTopicUseCase', () => {
     } as any
 
     const uc = new UpdateTopicUseCase(topicVersionRepository, topicRepository)
-    const res = await uc.execute(topicId, { content: 'c2' }, 'u-editor')
+    const res = await uc.execute({
+      topicId,
+      input: { content: 'c2' },
+      performedByUserId: 'u-editor',
+    })
 
     expect(res.version).toBe(2)
     expect(res.content).toBe('c2')
@@ -54,14 +58,18 @@ describe('[unit] UpdateTopicUseCase', () => {
     } as any
     const tr: ITopicRepository = { get: jest.fn(async () => undefined), upsert: jest.fn() } as any
     const uc = new UpdateTopicUseCase(tv, tr)
-    await expect(uc.execute('t', {}, 'u')).rejects.toBeInstanceOf(AppError)
+    await expect(
+      uc.execute({ topicId: 't', input: {}, performedByUserId: 'u' }),
+    ).rejects.toBeInstanceOf(AppError)
 
     const tr2: ITopicRepository = {
       get: jest.fn(async () => ({ topicId: 't', latestVersion: 1, deletedAt: Date.now() })),
       upsert: jest.fn(),
     } as any
     const uc2 = new UpdateTopicUseCase(tv, tr2)
-    await expect(uc2.execute('t', {}, 'u')).rejects.toBeInstanceOf(AppError)
+    await expect(
+      uc2.execute({ topicId: 't', input: {}, performedByUserId: 'u' }),
+    ).rejects.toBeInstanceOf(AppError)
   })
 
   it('throws 404 when current version not found', async () => {
@@ -72,7 +80,9 @@ describe('[unit] UpdateTopicUseCase', () => {
     } as any
     const tr: ITopicRepository = { get: jest.fn(async () => head), upsert: jest.fn() } as any
     const uc = new UpdateTopicUseCase(tv, tr)
-    await expect(uc.execute('t', {}, 'u')).rejects.toBeInstanceOf(AppError)
+    await expect(
+      uc.execute({ topicId: 't', input: {}, performedByUserId: 'u' }),
+    ).rejects.toBeInstanceOf(AppError)
   })
 
   it('resolves parentTopicId override and preserves when undefined', async () => {
@@ -95,9 +105,13 @@ describe('[unit] UpdateTopicUseCase', () => {
     } as any
     const tr: ITopicRepository = { get: jest.fn(async () => head), upsert: jest.fn() } as any
     const uc = new UpdateTopicUseCase(tv, tr)
-    const r1 = await uc.execute('t', { parentTopicId: null }, 'u')
+    const r1 = await uc.execute({
+      topicId: 't',
+      input: { parentTopicId: null },
+      performedByUserId: 'u',
+    })
     expect(r1.parentTopicId).toBeNull()
-    const r2 = await uc.execute('t', { content: 'C2' }, 'u')
+    const r2 = await uc.execute({ topicId: 't', input: { content: 'C2' }, performedByUserId: 'u' })
     expect(r2.parentTopicId).toBe('p1')
   })
 })

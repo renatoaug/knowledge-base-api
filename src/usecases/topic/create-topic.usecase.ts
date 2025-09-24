@@ -1,3 +1,4 @@
+import { UseCase } from 'src/usecases'
 import { TopicId, TopicVersion } from 'src/models'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { TopicVersionFactory } from 'src/usecases/topic'
@@ -8,13 +9,24 @@ export interface CreateTopicInput {
   parentTopicId?: TopicId | null
 }
 
-export class CreateTopicUseCase {
+export class CreateTopicUseCase extends UseCase<
+  { input: CreateTopicInput; performedByUserId: string },
+  TopicVersion
+> {
   constructor(
     private readonly topicVersionRepository: ITopicVersionRepository,
     private readonly topicRepository: ITopicRepository,
-  ) {}
+  ) {
+    super()
+  }
 
-  async execute(input: CreateTopicInput, performedByUserId: string): Promise<TopicVersion> {
+  async execute({
+    input,
+    performedByUserId,
+  }: {
+    input: CreateTopicInput
+    performedByUserId: string
+  }): Promise<TopicVersion> {
     const now = Date.now()
     const topicId = (await import('node:crypto')).randomUUID()
     const version = TopicVersionFactory.fromCreate(

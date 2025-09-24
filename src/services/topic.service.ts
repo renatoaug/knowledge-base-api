@@ -31,17 +31,17 @@ export class TopicService {
 
   async create(input: CreateTopicInput, user: User): Promise<TopicVersion> {
     const uc = new CreateTopicUseCase(this.topicVersionRepository, this.topicRepository)
-    return uc.execute(input, user.id)
+    return uc.execute({ input, performedByUserId: user.id })
   }
 
   async update(topicId: TopicId, input: UpdateTopicInput, user: User): Promise<TopicVersion> {
     const uc = new UpdateTopicUseCase(this.topicVersionRepository, this.topicRepository)
-    return uc.execute(topicId, input, user.id)
+    return uc.execute({ topicId, input, performedByUserId: user.id })
   }
 
   async delete(topicId: TopicId, user: User): Promise<void> {
     const uc = new DeleteTopicUseCase(this.topicVersionRepository, this.topicRepository)
-    await uc.execute(topicId, user.id)
+    await uc.execute({ topicId, performedByUserId: user.id })
   }
 
   async get(topicId: TopicId, version?: number): Promise<TopicVersion> {
@@ -59,6 +59,6 @@ export class TopicService {
     toId: TopicId,
   ): Promise<{ path: { topicId: TopicId; name: string }[] }> {
     const uc = new GetShortestPathUseCase(this.topicVersionRepository, this.topicRepository)
-    return uc.execute(fromId, toId)
+    return uc.execute({ fromId, toId })
   }
 }

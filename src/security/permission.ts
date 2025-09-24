@@ -10,11 +10,11 @@ export type Action =
   | 'resource:update'
   | 'resource:delete'
 
-export interface PermissionStrategy {
-  can(user: User, action: Action): boolean
+export abstract class PermissionStrategy {
+  abstract can(user: User, action: Action): boolean
 }
 
-export class RoleBasedPermissionStrategy implements PermissionStrategy {
+export class RoleBasedPermissionStrategy extends PermissionStrategy {
   can(user: User, action: Action): boolean {
     switch (user.role) {
       case 'admin':

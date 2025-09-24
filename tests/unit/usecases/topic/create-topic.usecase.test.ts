@@ -18,7 +18,10 @@ describe('[unit] CreateTopicUseCase', () => {
     } as any
 
     const uc = new CreateTopicUseCase(topicVersionRepository, topicRepository)
-    const res = await uc.execute({ name: 'Root', content: 'c' }, 'u-editor')
+    const res = await uc.execute({
+      input: { name: 'Root', content: 'c' },
+      performedByUserId: 'u-editor',
+    })
 
     expect(res.version).toBe(1)
     expect(res.action).toBe(TopicAction.CREATE)

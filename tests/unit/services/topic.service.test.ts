@@ -46,7 +46,7 @@ describe('[unit] TopicService', () => {
     const input = { name: 'Root', content: 'c' }
     const created = await service.create(input, user)
 
-    expect(spy).toHaveBeenCalledWith(input, user.id)
+    expect(spy).toHaveBeenCalledWith({ input, performedByUserId: user.id })
     expect(created.version).toBe(1)
     spy.mockRestore()
   })
@@ -85,7 +85,11 @@ describe('[unit] TopicService', () => {
 
     const res = await service.update('t1', { content: 'c2' }, user)
 
-    expect(spy).toHaveBeenCalledWith('t1', { content: 'c2' }, user.id)
+    expect(spy).toHaveBeenCalledWith({
+      topicId: 't1',
+      input: { content: 'c2' },
+      performedByUserId: user.id,
+    })
     expect(res.version).toBe(2)
     spy.mockRestore()
   })
@@ -114,7 +118,7 @@ describe('[unit] TopicService', () => {
 
     await service.delete('t1', user)
 
-    expect(spy).toHaveBeenCalledWith('t1', user.id)
+    expect(spy).toHaveBeenCalledWith({ topicId: 't1', performedByUserId: user.id })
     spy.mockRestore()
   })
 

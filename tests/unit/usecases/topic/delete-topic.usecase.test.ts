@@ -34,7 +34,7 @@ describe('[unit] DeleteTopicUseCase', () => {
     } as any
 
     const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
-    await uc.execute(topicId, 'u-admin')
+    await uc.execute({ topicId, performedByUserId: 'u-admin' })
 
     expect((topicVersionRepository.append as jest.Mock).mock.calls.length).toBe(1)
     const appended = (topicVersionRepository.append as jest.Mock).mock.calls[0][0] as TopicVersion
@@ -59,7 +59,9 @@ describe('[unit] DeleteTopicUseCase', () => {
       upsert: jest.fn(),
     } as any
     const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
-    await expect(uc.execute('t1', 'u')).rejects.toBeInstanceOf(AppError)
+    await expect(uc.execute({ topicId: 't1', performedByUserId: 'u' })).rejects.toBeInstanceOf(
+      AppError,
+    )
   })
 
   it('throws 404 when head is already deleted', async () => {
@@ -73,7 +75,9 @@ describe('[unit] DeleteTopicUseCase', () => {
       upsert: jest.fn(),
     } as any
     const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
-    await expect(uc.execute('t1', 'u')).rejects.toBeInstanceOf(AppError)
+    await expect(uc.execute({ topicId: 't1', performedByUserId: 'u' })).rejects.toBeInstanceOf(
+      AppError,
+    )
   })
 
   it('throws 404 when current version not found', async () => {
@@ -87,6 +91,8 @@ describe('[unit] DeleteTopicUseCase', () => {
       upsert: jest.fn(),
     } as any
     const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
-    await expect(uc.execute('t1', 'u')).rejects.toBeInstanceOf(AppError)
+    await expect(uc.execute({ topicId: 't1', performedByUserId: 'u' })).rejects.toBeInstanceOf(
+      AppError,
+    )
   })
 })

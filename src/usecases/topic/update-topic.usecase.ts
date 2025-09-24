@@ -2,6 +2,7 @@ import { TopicId, TopicVersion } from 'src/models'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
 import { TopicVersionFactory } from 'src/usecases/topic'
+import { UseCase } from 'src/usecases'
 
 export interface UpdateTopicInput {
   name?: string
@@ -9,17 +10,26 @@ export interface UpdateTopicInput {
   parentTopicId?: TopicId | null
 }
 
-export class UpdateTopicUseCase {
+export class UpdateTopicUseCase extends UseCase<
+  { topicId: TopicId; input: UpdateTopicInput; performedByUserId: string },
+  TopicVersion
+> {
   constructor(
     private readonly topicVersionRepository: ITopicVersionRepository,
     private readonly topicRepository: ITopicRepository,
-  ) {}
+  ) {
+    super()
+  }
 
-  async execute(
-    topicId: TopicId,
-    input: UpdateTopicInput,
-    performedByUserId: string,
-  ): Promise<TopicVersion> {
+  async execute({
+    topicId,
+    input,
+    performedByUserId,
+  }: {
+    topicId: TopicId
+    input: UpdateTopicInput
+    performedByUserId: string
+  }): Promise<TopicVersion> {
     const head = await this.topicRepository.get(topicId)
     if (!head || head.deletedAt) throw new AppError(404, 'Topic not found')
 
