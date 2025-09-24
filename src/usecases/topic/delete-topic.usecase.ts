@@ -1,7 +1,7 @@
-import crypto from 'node:crypto'
-import { TopicAction, TopicId, TopicVersion } from 'src/models'
+import { TopicId, TopicVersion } from 'src/models'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
+import { TopicVersionFactory } from 'src/usecases/topic'
 
 export class DeleteTopicUseCase {
   constructor(
@@ -23,18 +23,13 @@ export class DeleteTopicUseCase {
 
     const now = Date.now()
     const nextVersionNumber = head.latestVersion + 1
-    const tombstone: TopicVersion = {
-      id: crypto.randomUUID(),
+    const tombstone: TopicVersion = TopicVersionFactory.fromDelete(
       topicId,
-      version: nextVersionNumber,
-      name: current.name,
-      content: current.content,
-      parentTopicId: current.parentTopicId ?? null,
-      createdAt: current.createdAt,
-      updatedAt: now,
-      action: TopicAction.DELETE,
-      performedBy: performedByUserId,
-    }
+      nextVersionNumber,
+      current,
+      now,
+      performedByUserId,
+    )
 
     await this.topicVersionRepository.append(tombstone)
     await this.topicRepository.upsert({ topicId, latestVersion: nextVersionNumber, deletedAt: now })
