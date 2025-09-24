@@ -149,7 +149,7 @@ describe('[integration] DELETE /topics/:id', () => {
       .set('Authorization', 'Bearer viewer-token')
       .expect(404)
 
-    // Verify individual resources are gone (cascade delete worked)
+    // Verify individual resources are gone
     await request(app)
       .get(`/resources/${resource1.body.id}`)
       .set('Authorization', 'Bearer viewer-token')
