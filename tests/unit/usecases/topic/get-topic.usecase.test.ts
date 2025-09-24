@@ -82,7 +82,7 @@ describe('[unit] GetTopicUseCase', () => {
     } as any
 
     const topicRepository: ITopicRepository = {
-      get: jest.fn(),
+      get: jest.fn().mockResolvedValue({ topicId, latestVersion: 1, deletedAt: null }),
       upsert: jest.fn(),
     } as any
 
