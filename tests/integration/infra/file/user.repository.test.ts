@@ -1,23 +1,7 @@
-import os from 'node:os'
-import path from 'node:path'
-import { promises as fs } from 'node:fs'
 import { UserRole } from 'src/models/user'
 import { UserRepositoryFile } from 'src/infra/persistence/file'
 
 describe('[integration] UserRepositoryFile', () => {
-  const tmpPrefix = path.join(os.tmpdir(), 'kb-api-users-')
-  let tmpDir = ''
-
-  beforeAll(async () => {
-    tmpDir = await fs.mkdtemp(tmpPrefix)
-    process.env.DATA_DIR = tmpDir
-  })
-
-  afterAll(async () => {
-    await fs.rm(tmpDir, { recursive: true, force: true })
-    delete process.env.DATA_DIR
-  })
-
   it('createMany then findByToken returns the user', async () => {
     const repo = new UserRepositoryFile()
     const now = Date.now()

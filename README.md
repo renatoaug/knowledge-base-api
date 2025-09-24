@@ -1,6 +1,6 @@
 ## Description
 
-RESTful API for a dynamic Knowledge Base system with hierarchical topics, versioning, resources, users, roles/permissions, and robust architecture (SOLID + design patterns). Built with Node.js, TypeScript and Express.
+RESTful API for a dynamic Knowledge Base system with hierarchical topics, versioning, resources, users, roles/permissions, and SOLID architecture. Built with Node.js, TypeScript and Express.
 
 ## Setup
 
@@ -68,9 +68,10 @@ This project uses a simple file-based persistence layer (JSON files) as the defa
 
 - Directory: `<project-root>/data` (created automatically on first access)
 - Files:
-  - `topics.json` (topic heads: `topicId`, `latestVersion`, `deletedAt`)
+  - `topics.json` (topic heads)
   - `topics.versions.json` (append-only topic versions)
-  - `users.json` (seeded users for auth in local/dev)
+  - `resources.json` (represents an external link or document associated with a topic)
+  - `users.json` (represents a user who can access the knowledge base)
 
 No manual configuration is required; the data directory and files are created automatically when the application runs.
 

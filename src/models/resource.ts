@@ -15,4 +15,5 @@ export interface Resource {
   type: ResourceType
   createdAt: number
   updatedAt: number
+  deletedAt?: number | null
 }

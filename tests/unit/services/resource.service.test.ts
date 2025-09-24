@@ -16,6 +16,7 @@ describe('[unit] ResourceService', () => {
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      deleteByTopic: jest.fn(),
       get: jest.fn(),
       listByTopic: jest.fn(),
     }

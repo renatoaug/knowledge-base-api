@@ -1,5 +1,5 @@
 import { TopicId, TopicVersion } from 'src/models'
-import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
+import { ITopicRepository, ITopicVersionRepository, IResourceRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
 import { TopicVersionFactory } from 'src/usecases/topic'
 import { UseCase } from 'src/usecases'
@@ -11,6 +11,7 @@ export class DeleteTopicUseCase extends UseCase<
   constructor(
     private readonly topicVersionRepository: ITopicVersionRepository,
     private readonly topicRepository: ITopicRepository,
+    private readonly resourceRepository: IResourceRepository,
   ) {
     super()
   }
@@ -45,5 +46,6 @@ export class DeleteTopicUseCase extends UseCase<
 
     await this.topicVersionRepository.append(tombstone)
     await this.topicRepository.upsert({ topicId, latestVersion: nextVersionNumber, deletedAt: now })
+    await this.resourceRepository.deleteByTopic(topicId)
   }
 }
