@@ -1,6 +1,7 @@
 import { DeleteTopicUseCase } from 'src/usecases/topic'
 import { Topic, TopicVersion, TopicAction } from 'src/models'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
+import { AppError } from 'src/middlewares'
 
 describe('[unit] DeleteTopicUseCase', () => {
   it('appends tombstone version and marks head deletedAt', async () => {
@@ -46,5 +47,46 @@ describe('[unit] DeleteTopicUseCase', () => {
     expect(upserted!.topicId).toBe(topicId)
     expect(upserted!.latestVersion).toBe(2)
     expect(typeof upserted!.deletedAt).toBe('number')
+  })
+
+  it('throws 404 when head not found', async () => {
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn(),
+    } as any
+    const topicRepository: ITopicRepository = {
+      get: jest.fn(async () => undefined),
+      upsert: jest.fn(),
+    } as any
+    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
+    await expect(uc.execute('t1', 'u')).rejects.toBeInstanceOf(AppError)
+  })
+
+  it('throws 404 when head is already deleted', async () => {
+    const head: Topic = { topicId: 't1', latestVersion: 1, deletedAt: Date.now() }
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn(),
+    } as any
+    const topicRepository: ITopicRepository = {
+      get: jest.fn(async () => head),
+      upsert: jest.fn(),
+    } as any
+    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
+    await expect(uc.execute('t1', 'u')).rejects.toBeInstanceOf(AppError)
+  })
+
+  it('throws 404 when current version not found', async () => {
+    const head: Topic = { topicId: 't1', latestVersion: 1, deletedAt: null }
+    const topicVersionRepository: ITopicVersionRepository = {
+      append: jest.fn(),
+      getByTopicAndVersion: jest.fn(async () => undefined),
+    } as any
+    const topicRepository: ITopicRepository = {
+      get: jest.fn(async () => head),
+      upsert: jest.fn(),
+    } as any
+    const uc = new DeleteTopicUseCase(topicVersionRepository, topicRepository)
+    await expect(uc.execute('t1', 'u')).rejects.toBeInstanceOf(AppError)
   })
 })

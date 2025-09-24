@@ -22,6 +22,14 @@ $ nvm use
 $ npm install
 ```
 
+### Environment variables
+
+Copy `.env.sample` to `.env`:
+
+```bash
+cp .env.sample .env
+```
+
 ### Seed
 
 Seed users for local testing:
