@@ -14,6 +14,7 @@ describe('[unit] GetShortestPathUseCase', () => {
       upsert: jest.fn(),
       get: jest.fn(async (id) => heads.find((h) => h.topicId === id)),
       listAll: jest.fn().mockResolvedValue(heads),
+      findChildren: jest.fn().mockResolvedValue([]),
     }
     return { topicVersionRepository, topicRepository }
   }

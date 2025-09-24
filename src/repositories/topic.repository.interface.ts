@@ -10,4 +10,5 @@ export interface ITopicRepository {
   upsert(head: Topic): Promise<void>
   get(topicId: TopicId): Promise<Topic | undefined>
   listAll(): Promise<Topic[]>
+  findChildren(topicId: TopicId): Promise<Topic[]>
 }
