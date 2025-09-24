@@ -2,6 +2,18 @@
 
 RESTful API for a dynamic Knowledge Base system with hierarchical topics, versioning, resources, users, roles/permissions, and SOLID architecture. Built with Node.js, TypeScript and Express.
 
+### Key Features
+
+- **Hierarchical topics**: Tree-structured knowledge organization with parent-child relationships
+- **Version control**: Immutable topic versions with full history tracking
+- **Resources management**: Link external documents, videos, articles to topics
+- **Cascade operations**: Automatic resource cleanup when topics are deleted
+- **Custom algorithms**: Shortest path calculation between topics
+- **Role-based access**: Admin, Editor, Viewer permissions
+- **Clean architecture**: SOLID principles with dependency injection
+- **Comprehensive testing**: Unit and integration tests
+- **OpenAPI documentation**: Auto-generated Swagger docs with authentication
+
 ## Setup
 
 ### Prerequisites
@@ -45,11 +57,62 @@ $ npm run seed
 $ npm run dev
 ```
 
-### Authentication for local/dev
+## Testing
 
-Use header: `Authorization: Bearer editor-token` (`viewer-token` or `admin-token`).
+```bash
+# Run specific test files
+npm test -- --testPathPatterns="topic.service.test.ts"
 
-Example:
+# Run all tests
+npm run test
+
+# Run integration tests only
+npm test -- --testPathPatterns="integration"
+
+# Run unit tests only
+npm test -- --testPathPatterns="unit"
+```
+
+## Data storage
+
+### File-based database
+
+Simple JSON file persistence for development and testing:
+
+- **Directory**: `<project-root>/data` (auto-created)
+- **Files**:
+  - `topics.json` - Topic heads (latest version pointers)
+  - `topics.versions.json` - Immutable topic version history
+  - `resources.json` - External resources linked to topics
+  - `users.json` - User accounts and roles
+
+### Data relationships
+
+- **Topics** → **Resources** (1:N) with cascade delete
+- **Topics** → **Topics** (1:N) hierarchical structure
+- **Users** → **Topics** (M:N) through permissions
+
+## API documentation
+
+### Interactive documentation
+
+**[Swagger UI](http://localhost:3000/docs)** - Interactive API explorer with authentication
+
+### Authentication
+
+All endpoints require Bearer token authentication. Use the "Authorize" button in Swagger UI or include the header:
+
+```
+Authorization: Bearer <token>
+```
+
+**Available tokens:**
+
+- `admin-token` - Full access (create, read, update, delete)
+- `editor-token` - Create, read, update (no delete)
+- `viewer-token` - Read-only access
+
+Request example:
 
 ```bash
 curl -s -X POST http://localhost:3000/topics \
@@ -58,29 +121,68 @@ curl -s -X POST http://localhost:3000/topics \
   -d '{ "name":"Root", "content":"c", "parentTopicId":null }'
 ```
 
-## API Docs
+## Quick start
 
-[Swagger UI](http://localhost:3000/docs)
+### Basic usage
 
-## Data storage (file-based database)
+1. **Start the server**: `npm run dev`
+2. **Open Swagger UI**: [http://localhost:3000/docs](http://localhost:3000/docs)
+3. **Authorize**: Click "Authorize" and use `admin-token`, `editor-token`, or `viewer-token`
+4. **Explore**: Use the interactive API explorer to test endpoints
 
-This project uses a simple file-based persistence layer (JSON files) as the default database.
+## Advanced features
 
-- Directory: `<project-root>/data` (created automatically on first access)
-- Files:
-  - `topics.json` (topic heads)
-  - `topics.versions.json` (append-only topic versions)
-  - `resources.json` (represents an external link or document associated with a topic)
-  - `users.json` (represents a user who can access the knowledge base)
+### Version control
 
-No manual configuration is required; the data directory and files are created automatically when the application runs.
+Every topic modification creates a new immutable version:
 
-## Testing
+- **Create**: Version 1 with `CREATE` action
+- **Update**: Version N+1 with `UPDATE` action
+- **Delete**: Version N+1 with `DELETE` action (soft delete)
 
-```bash
-$ nvm use
-$ npm run test
+### Hierarchical structure
+
+Topics can have parent-child relationships:
+
+- **Root topics**: `parentTopicId: null`
+- **Child topics**: Reference parent via `parentTopicId`
+- **Tree navigation**: Get complete topic hierarchy
+- **Path finding**: Calculate shortest path between any two topics
+
+### Resource types
+
+Supported resource types:
+
+- `video` - Video content
+- `article` - Text articles
+- `pdf` - PDF documents
+- `link` - External links
+
+## Architecture
+
+### Clean architecture
+
+The project follows Clean Architecture principles with clear separation of concerns:
+
 ```
+src/
+├── controllers/     # HTTP request/response handling
+├── services/        # Business logic orchestration
+├── usecases/        # Application-specific business rules
+├── repositories/    # Data access interfaces (ports)
+├── infra/          # Infrastructure implementations (adapters)
+├── models/         # Domain entities and types
+├── security/       # Authentication and authorization
+├── middlewares/    # Cross-cutting concerns
+└── schemas/        # Validation and OpenAPI generation
+```
+
+### Design patterns
+
+- **Strategy**: Permission strategies for role-based access
+- **Factory**: Topic version creation
+- **Repository**: Data access abstraction
+- **Use Case**: Business logic encapsulation
 
 ## Conventional commits
 
