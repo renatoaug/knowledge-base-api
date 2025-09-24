@@ -24,3 +24,9 @@ export interface Topic {
   latestVersion: number
   deletedAt: number | null
 }
+
+export interface TopicTreeNode {
+  topicId: TopicId
+  name: string
+  children: TopicTreeNode[]
+}

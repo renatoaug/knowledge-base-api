@@ -1,5 +1,5 @@
-import { GetTopicTreeUseCase, TopicTreeNode } from 'src/usecases/topic/get-topic-tree.usecase'
-import { Topic, TopicVersion, TopicAction } from 'src/models'
+import { GetTopicTreeUseCase } from 'src/usecases/topic'
+import { Topic, TopicVersion, TopicAction, TopicTreeNode } from 'src/models/topic'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 
 describe('[unit] GetTopicTreeUseCase', () => {

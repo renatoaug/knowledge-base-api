@@ -8,6 +8,7 @@ import {
   GetTopicUseCase,
   GetTopicTreeUseCase,
 } from 'src/usecases/topic'
+import { TopicTreeNode } from 'src/models/topic'
 
 export interface CreateTopicInput {
   name: string
@@ -47,7 +48,7 @@ export class TopicService {
     return uc.execute(topicId, version)
   }
 
-  async getTree(topicId: TopicId) {
+  async getTree(topicId: TopicId): Promise<TopicTreeNode> {
     const uc = new GetTopicTreeUseCase(this.topicVersionRepository, this.topicRepository)
     return uc.execute(topicId)
   }

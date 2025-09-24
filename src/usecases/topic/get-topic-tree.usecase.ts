@@ -1,12 +1,6 @@
-import { TopicId, TopicVersion } from 'src/models'
+import { TopicId, TopicTreeNode, TopicVersion } from 'src/models/topic'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
 import { AppError } from 'src/middlewares'
-
-export interface TopicTreeNode {
-  topicId: TopicId
-  name: string
-  children: TopicTreeNode[]
-}
 
 export class GetTopicTreeUseCase {
   constructor(

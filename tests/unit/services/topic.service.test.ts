@@ -1,5 +1,5 @@
 import { TopicService } from 'src/services'
-import { TopicVersion, TopicAction } from 'src/models'
+import { TopicVersion, TopicAction, TopicTreeNode } from 'src/models/topic'
 import { User } from 'src/models/user'
 import {
   CreateTopicUseCase,
@@ -8,7 +8,7 @@ import {
   DeleteTopicUseCase,
 } from 'src/usecases/topic'
 import { ITopicRepository, ITopicVersionRepository } from 'src/repositories'
-import { GetTopicTreeUseCase, TopicTreeNode } from 'src/usecases/topic/get-topic-tree.usecase'
+import { GetTopicTreeUseCase } from 'src/usecases/topic'
 
 describe('[unit] TopicService', () => {
   it('create delegates to CreateTopicUseCase.execute', async () => {
