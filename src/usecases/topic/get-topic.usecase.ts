@@ -17,6 +17,9 @@ export class GetTopicUseCase extends UseCase<TopicId, TopicVersion> {
     }
 
     if (version) {
+      const head = await this.topicRepository.get(topicId)
+      if (!head || head.deletedAt) throw new AppError(404, 'Topic not found')
+
       const v = await this.topicVersionRepository.getByTopicAndVersion(topicId, Number(version))
       if (!v) throw new AppError(404, 'Topic version not found')
 
