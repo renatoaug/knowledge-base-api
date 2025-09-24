@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { makeTopicController } from 'src/container'
 import { z } from 'zod'
-import { ValidationMiddleware } from 'src/middlewares'
+import { ValidationMiddleware, AppError } from 'src/middlewares'
 import { makeAuthMiddleware } from 'src/container'
 
 const router = Router()
@@ -20,6 +20,11 @@ const updateSchema = z.object({
   parentTopicId: z.uuid().nullable().optional(),
 })
 
+const shortestPathQuerySchema = z.object({
+  from: z.uuid(),
+  to: z.uuid(),
+})
+
 router.post(
   '/',
   auth.authenticate,
@@ -34,6 +39,28 @@ router.put(
   auth.authorize('topic:update'),
   ValidationMiddleware.validateBody(updateSchema),
   controller.update,
+)
+
+router.get(
+  '/shortest_path',
+  auth.authenticate,
+  auth.authorize('topic:read'),
+  (req, res, next) => {
+    const parsed = shortestPathQuerySchema.safeParse(req.query)
+    if (!parsed.success) {
+      const errors = parsed.error.issues.map((iss) => ({
+        field: iss.path.join('.') || undefined,
+        message: iss.message,
+      }))
+      return next(new AppError(400, 'Validation error', { errors }))
+    }
+
+    const locals = res.locals as { shortestPathQuery?: { from: string; to: string } }
+    locals.shortestPathQuery = parsed.data
+
+    next()
+  },
+  controller.getShortestPath,
 )
 
 router.delete('/:id', auth.authenticate, auth.authorize('topic:delete'), controller.delete)

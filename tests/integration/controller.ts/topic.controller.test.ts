@@ -217,3 +217,66 @@ describe('[integration] GET /topics/:id/tree', () => {
     })
   })
 })
+
+describe('[integration] GET /topics/shortest_path', () => {
+  it('returns 200 with path root->child->grandchild', async () => {
+    const root = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const rootId = root.body.topicId
+
+    const child = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Child', content: 'c', parentTopicId: rootId })
+      .expect(201)
+
+    const childId = child.body.topicId
+
+    const grandchild = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'Grandchild', content: 'c', parentTopicId: childId })
+      .expect(201)
+
+    const grandchildId = grandchild.body.topicId
+
+    const res = await request(app)
+      .get(`/topics/shortest_path?from=${rootId}&to=${grandchildId}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    expect(res.body.path.map((n: any) => n.topicId)).toEqual([rootId, childId, grandchildId])
+    expect(res.body.path.map((n: any) => n.name)).toEqual(['Root', 'Child', 'Grandchild'])
+  })
+
+  it('returns 400 when query is invalid', async () => {
+    const res = await request(app)
+      .get(`/topics/shortest_path?from=not-uuid&to=also-not-uuid`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(400)
+    expect(res.body.message).toBe('Validation error')
+  })
+
+  it('returns 404 when no path exists', async () => {
+    const a = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'A', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const b = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer editor-token')
+      .send({ name: 'B', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    await request(app)
+      .get(`/topics/shortest_path?from=${a.body.topicId}&to=${b.body.topicId}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+  })
+})
