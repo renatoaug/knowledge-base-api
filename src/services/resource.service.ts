@@ -33,6 +33,7 @@ export class ResourceService {
       url: input.url,
       description: input.description,
       type: input.type,
+      deletedAt: null,
       createdAt: now,
       updatedAt: now,
     }
