@@ -46,4 +46,25 @@ export class TopicRepositoryFile implements ITopicRepository {
     const store = await readJsonFile<TopicStore>(TOPIC_FILE, { topics: [] })
     return store.topics
   }
+
+  async findChildren(topicId: TopicId): Promise<Topic[]> {
+    const store = await readJsonFile<TopicStore>(TOPIC_FILE, { topics: [] })
+    const versionStore = await readJsonFile<VersionStore>(VERSION_FILE, { versions: [] })
+
+    const children: Topic[] = []
+
+    for (const topic of store.topics) {
+      if (topic.deletedAt) continue
+
+      const latestVersion = versionStore.versions.find(
+        (v) => v.topicId === topic.topicId && v.version === topic.latestVersion,
+      )
+
+      if (latestVersion && latestVersion.parentTopicId === topicId) {
+        children.push(topic)
+      }
+    }
+
+    return children
+  }
 }

@@ -199,6 +199,171 @@ describe('[integration] DELETE /topics/:id', () => {
       .set('Authorization', 'Bearer viewer-token')
       .expect(404)
   })
+
+  it('cascade deletes all children when parent topic is deleted', async () => {
+    const { ResourceType } = await import('src/models')
+
+    const parent = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Parent', content: 'Parent content', parentTopicId: null })
+      .expect(201)
+
+    const parentId = parent.body.topicId
+
+    const child1 = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Child 1', content: 'Child 1 content', parentTopicId: parentId })
+      .expect(201)
+
+    const child2 = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Child 2', content: 'Child 2 content', parentTopicId: parentId })
+      .expect(201)
+
+    const child1Id = child1.body.topicId
+    const child2Id = child2.body.topicId
+
+    const grandchild = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Grandchild', content: 'Grandchild content', parentTopicId: child1Id })
+      .expect(201)
+
+    const grandchildId = grandchild.body.topicId
+
+    await request(app)
+      .post('/resources')
+      .set('Authorization', 'Bearer editor-token')
+      .send({
+        topicId: parentId,
+        url: 'https://parent.com',
+        description: 'Parent resource',
+        type: ResourceType.LINK,
+      })
+      .expect(201)
+
+    await request(app)
+      .post('/resources')
+      .set('Authorization', 'Bearer editor-token')
+      .send({
+        topicId: child1Id,
+        url: 'https://child1.com',
+        description: 'Child 1 resource',
+        type: ResourceType.LINK,
+      })
+      .expect(201)
+
+    await request(app)
+      .post('/resources')
+      .set('Authorization', 'Bearer editor-token')
+      .send({
+        topicId: grandchildId,
+        url: 'https://grandchild.com',
+        description: 'Grandchild resource',
+        type: ResourceType.LINK,
+      })
+      .expect(201)
+
+    await request(app)
+      .get(`/topics/${parentId}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    await request(app)
+      .get(`/topics/${child1Id}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    await request(app)
+      .get(`/topics/${child2Id}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    await request(app)
+      .get(`/topics/${grandchildId}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    await request(app)
+      .get(`/topics/${parentId}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    await request(app)
+      .get(`/topics/${child1Id}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    await request(app)
+      .get(`/topics/${grandchildId}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(200)
+
+    await request(app)
+      .delete(`/topics/${parentId}`)
+      .set('Authorization', 'Bearer admin-token')
+      .expect(204)
+
+    await request(app)
+      .get(`/topics/${parentId}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    await request(app)
+      .get(`/topics/${child1Id}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    await request(app)
+      .get(`/topics/${child2Id}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    await request(app)
+      .get(`/topics/${grandchildId}`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    await request(app)
+      .get(`/topics/${parentId}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    await request(app)
+      .get(`/topics/${child1Id}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+
+    await request(app)
+      .get(`/topics/${grandchildId}/resources`)
+      .set('Authorization', 'Bearer viewer-token')
+      .expect(404)
+  })
+
+  it('returns 404 when trying to delete already deleted topic', async () => {
+    const create = await request(app)
+      .post('/topics')
+      .set('Authorization', 'Bearer admin-token')
+      .send({ name: 'Root', content: 'c', parentTopicId: null })
+      .expect(201)
+
+    const topicId = create.body.topicId
+
+    await request(app)
+      .delete(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer admin-token')
+      .expect(204)
+
+    const res = await request(app)
+      .delete(`/topics/${topicId}`)
+      .set('Authorization', 'Bearer admin-token')
+      .expect(404)
+
+    expect(res.body.message).toBe('Topic not found')
+  })
 })
 
 describe('[integration] GET /topics/:id', () => {

@@ -25,6 +25,7 @@ describe('[unit] ResourceService', () => {
       upsert: jest.fn(),
       get: jest.fn(),
       listAll: jest.fn(),
+      findChildren: jest.fn(),
     }
 
     service = new ResourceService(resources, topics)
